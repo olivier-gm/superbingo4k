@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo de Precio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .checkbox-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .checkbox-container label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cálculo de Precio</h1>
+    <p>Precio base por casilla: <strong>50$</strong></p>
+    <p>Cada tercera casilla seleccionada es <strong>gratis</strong>.</p>
+    <div class="checkbox-container" id="checkboxContainer">
+        <!-- Se generarán las casillas aquí -->
+    </div>
+    <h2>Total: <span id="total">0</span>$</h2>
+
+    <script>
+        const basePrice = 50; // Precio base por casilla
+        const totalElement = document.getElementById('total');
+        const checkboxContainer = document.getElementById('checkboxContainer');
+
+        // Generar dinámicamente 20 casillas
+        for (let i = 1; i <= 20; i++) {
+            const label = document.createElement('label');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = i;
+            checkbox.addEventListener('change', calculateTotal); // Escuchar el cambio de estado
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(` ${i}`));
+            checkboxContainer.appendChild(label);
+        }
+
+        function calculateTotal() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            let selectedCount = 0;
+            let total = 0; // Comenzar en 0 porque no hay nada seleccionado inicialmente
+
+            checkboxes.forEach((checkbox) => {
+                if (checkbox.checked) {
+                    selectedCount++;
+                    // Solo sumar si no es la tercera casilla gratuita
+                    if (selectedCount % 3 !== 0) {
+                        total += basePrice;
+                    }
+                }
+            });
+
+            totalElement.textContent = total;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>verificados</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEJXjL6wo8dWn3dxjOdHOq1eMkDpsH8+dyjkb9EpgIjoqHIm76dR3gJybKvWk" crossorigin="anonymous">
+    <style>
+        /* Ajustar el ancho de las celdas para que todo quepa correctamente */
+        table th, table td {
+            text-align: center;
+            white-space: nowrap; /* Evitar el salto de línea en celdas */
+            overflow: hidden; /* Evitar que el contenido se desborde */
+            text-overflow: ellipsis; /* Añadir puntos suspensivos si el contenido es demasiado largo */
+            font-size: 0.8rem; /* Tamaño de letra pequeño por defecto */
+        }
+
+        /* Estilo para las filas y columnas de la tabla */
+        table {
+            width: 100%;
+            table-layout: fixed; /* Asegura que las celdas tengan un ancho fijo */
+        }
+
+        .btn-delete {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-delete:hover {
+            background-color: #45a049;
+        }
+
+        .container {
+            margin-top: 30px;
+        }
+
+        /* Mejorar la apariencia de la tabla */
+        th {
+            background-color: #343a40; /* Color oscuro para el encabezado */
+            color: #fff; /* Texto blanco */
+            font-weight: bold;
+            font-size: 1rem; /* Aumentar el tamaño de la fuente para los encabezados */
+        }
+
+        tbody tr:nth-child(odd) {
+            background-color: #f8f9fa; /* Alternar colores de filas */
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #e9ecef; /* Color más claro para filas pares */
+        }
+
+        .table-bordered {
+            border: 1px solid #ddd;
+        }
+
+        .table-striped tbody tr:hover {
+            background-color: #d6d8db;
+        }
+
+        /* Añadir la clase de Bootstrap para hacer la tabla responsiva */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        /* Asegurarse de que las celdas no se desborden y se adapten al contenido */
+        .table th, .table td {
+            word-wrap: break-word;
+            max-width: 150px; /* Ajustar el ancho de las celdas */
+        }
+
+        /* Estilo general para la tabla y el contenido */
+        .table td, .table th {
+            font-size: 0.8rem; /* Reducir el tamaño de la fuente */
+        }
+
+        /* Mejorar la visibilidad de la tabla en pantallas pequeñas */
+        @media (max-width: 768px) {
+            .table th, .table td {
+                font-size: 0.75rem; /* Ajustar el tamaño de texto en pantallas pequeñas */
+            }
+
+            .btn-delete {
+                font-size: 10px; /* Botón más pequeño en pantallas pequeñas */
+                padding: 4px 8px; /* Ajustar el tamaño del botón */
+            }
+        }
+
+        @media (max-width: 576px) {
+            .table th, .table td {
+                font-size: 0.7rem; /* Ajustar aún más el tamaño de texto en pantallas más pequeñas */
+            }
+
+            .btn-delete {
+                font-size: 9px; /* Botón más pequeño en pantallas más pequeñas */
+                padding: 3px 7px; /* Ajustar el tamaño del botón */
+            }
+        }
+
+        /* Centrado del título */
+        h2 {
+            text-align: center;
+            font-size: 1.5rem; /* Ajuste para títulos más grandes */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 class="text-center mb-4">verificados</h2>
+
+        <!-- Tabla de Requeridos envuelta en un contenedor responsivo -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Nombre y Apellidos</th>
+                        <th>Correo</th>
+                        <th>Cédula</th>
+                        <th>Teléfono</th>
+                        <th>Banco</th>
+                        <th>Referencia</th>
+                        <th>Cartones Solicitados</th>
+                        <th>Bs</th>
+                        <th>Fecha</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Ejemplo de fila (Esta fila debería generarse dinámicamente con los datos de la base de datos) -->
+                    <tr>
+                        <td class="clickable-cell">Juan Pérez</td>
+                        <td class="clickable-cell">juan.perez@email.com</td>
+                        <td class="clickable-cell">12345678</td>
+                        <td class="clickable-cell">04123456789</td>
+                        <td class="clickable-cell">Banco Nacional</td>
+                        <td class="clickable-cell">21223232323232</td>
+                        <td class="clickable-cell">3</td>
+                        <td class="clickable-cell">1500 Bs</td>
+                        <td class="clickable-cell">2024-11-24</td>
+ 
+                    </tr>
+                    <!-- Aquí se agregarían más filas dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS, Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-8l+kh63oC8U5U1yC7ZpEZHjSt4c2p7UsQgfIjs7eF96Z5HpTFs6TfvdTeb9D2bpt" crossorigin="anonymous"></script>
+
+    <script>
+
+
+        // Función para manejar el clic en las celdas
+        document.querySelectorAll('.clickable-cell').forEach(cell => {
+            cell.addEventListener('click', function() {
+                alert(`Valor de la celda: ${this.textContent}`);
+            });
+        });
+    </script>
+
+</body>
+</html>

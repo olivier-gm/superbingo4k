@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Descargar Cartones</title>
+    <link rel="shortcut icon" href="/static/img/logo.png" type="image/x-icon">
+    <style>
+        /* body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f8f8;
+        } */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            padding: 20px;
+        }
+        .main-container {
+            max-width: 1200px;
+            margin: auto;
+            text-align: center;
+        }
+        .partida-section {
+            margin-top: 40px;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #007BFF;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        #cartones-container, .cartones-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 20px;
+            padding: 20px;
+            max-width: 90%;
+        }
+
+        .carton {
+            width: 220px;
+            text-align: center;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .carton:hover {
+            transform: scale(1.05);
+        }
+
+        .carton img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .carton p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        .btn-descargar {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 10px;
+        }
+
+        .btn-descargar:hover {
+            background-color: #0056b3;
+        }
+
+        /* Estilos para la vista previa */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            position: relative;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 90%;
+            max-height: 90%;
+            text-align: center;
+        }
+
+        .popup-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 5px;
+        }
+
+        .close-popup {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .close-popup:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <h1>¡Hola, {{ nombre }}!</h1>
+        <p>Aquí tienes tus cartones. ¡Mucha suerte!</p>
+
+        {% if cartones %}
+            <div class="partida-section">
+                <h2>{{ venta1 }}</h2>
+                <div class="cartones-container">
+                    {% for carton in cartones %}
+                        <div class="carton">
+                            <img src="{{ url_for('static', filename='cartones/Carton ' ~ carton|string ~ '.png') }}" alt="Cartón {{ carton }}" onclick="mostrarVistaPrevia('{{ carton }}')" />
+                            <p>Cartón {{ carton }}</p>
+                            <a href="{{ url_for('static', filename='cartones/Carton ' ~ carton|string ~ '.png') }}" class="btn-descargar" download>Descargar</a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if cartones2 %}
+            <div class="partida-section">
+                <h2>{{ venta2 }}</h2>
+                <div class="cartones-container">
+                    {% for carton in cartones2 %}
+                        <div class="carton">
+                            <img src="{{ url_for('static', filename='cartones/Carton ' ~ carton|string ~ '.png') }}" alt="Cartón {{ carton }}" onclick="mostrarVistaPrevia('{{ carton }}')" />
+                            <p>Cartón {{ carton }}</p>
+                            <a href="{{ url_for('static', filename='cartones/Carton ' ~ carton|string ~ '.png') }}" class="btn-descargar" download>Descargar</a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+
+    <!-- Popup para la vista previa -->
+    <div class="popup-overlay" id="popup-overlay">
+        <div class="popup-content">
+            <button class="close-popup" onclick="cerrarVistaPrevia()">X</button>
+            <img id="popup-image" src="" alt="Vista Previa">
+        </div>
+    </div>
+
+    <script>
+        // Función para mostrar la vista previa del cartón
+        function mostrarVistaPrevia(carton) {
+            const popupImage = document.getElementById('popup-image');
+            popupImage.src = '/static/cartones/Carton ' + carton + '.png';  // Establece la imagen en el popup
+            document.getElementById('popup-overlay'.style.display = 'flex';  // Muestra el popup
+        }
+
+        // Función para cerrar la vista previa
+        function cerrarVistaPrevia() {
+            document.getElementById('popup-overlay'.style.display = 'none';  // Oculta el popup
+        }
+    </script>
+
+</body>
+</html>

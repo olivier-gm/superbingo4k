@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/static/img/logo.png" type="image/x-icon">
+    <title>Selección de Cartones</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <style>
+
+        body {
+            background-color: #000000;
+            margin-bottom: 30%;
+        }
+
+        /* 1. Contenedor principal para el layout de dos columnas */
+        .layout-container {
+            display: flex;
+            gap: 2rem; /* Espacio entre el Top 5 y los cartones */
+            align-items: flex-start; /* Alinea ambas columnas arriba */
+        }
+
+        /* 2. Barra lateral para el "Top 5" */
+        .sidebar {
+            flex: 0 0 230px; /* Ancho fijo: no crece, no se encoge */
+            background: #1a1a1a; /* Fondo oscuro para el panel */
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid #333;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .sidebar h2 {
+            font-weight: bold;
+            color: #4da6ff; /* Color azul del tema */
+            text-align: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #333;
+            padding-bottom: 0.75rem;
+        }
+
+     /* Diseño moderno para la tabla */
+    .custom-table {
+        margin-top: 1rem;
+        color: #f0f0f0;
+    }
+
+    .custom-table thead {
+        background: linear-gradient(45deg, #2575fc, #6a11cb); /* Gradient for a modern look */
+        color: white;
+        border-bottom: none;
+    }
+
+    .custom-table th, .custom-table td {
+        padding: 6px 7px;
+        text-align: center;
+        border-bottom: 1px solid #333;
+    }
+
+    .custom-table th {
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .custom-table tbody tr {
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: #2a2a2a;
+        transform: scale(1.02); /* Slight scale on hover */
+    }
+
+        /* 3. Contenido principal (los cartones) */
+        .main-content {
+            flex: 1; /* Ocupa todo el espacio restante */
+        }
+               /* 4. Responsividad: ¿Qué pasa en pantallas pequeñas? */
+
+                    @media (max-width: 1100px) {
+            .layout-container {
+                flex-direction: column; /* Apila las columnas una sobre otra */
+            }
+            .sidebar {
+                flex-basis: 100%; /* La barra lateral ocupa todo el ancho */
+                width: fit-content;
+                margin-left: 16%;
+            }}
+                    @media (max-width: 430px) {
+
+            .sidebar {
+                margin-left: 4%;
+
+            }
+        }
+
+        /* Estilo para las cajas de cartones */
+        .carton-box {
+            cursor: pointer;
+            width: 100%;
+            max-width: 100px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: auto;
+            border: 2px solid #4da6ff !important;
+            background-color: #ecf1f5;
+            transition: all 0.3s ease;
+        }
+
+        .carton-box:hover {
+            background-color: #a5c6e3;
+        }
+
+        /* Texto dentro de las cajas */
+        .texto {
+            font-size: 14px;
+            color: #191919;
+            transition: color 0.3s ease;
+        }
+
+
+
+
+/* Estilo personalizado para el botón */
+.btn-custom {
+    background: #2575fc !important; /* Asegúrate de que este color se aplique */
+    color: white;
+    font-size: 14px;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.btn-custom:hover {
+    background: #1e5fd0 !important; /* Azul más oscuro al pasar el mouse */
+    transform: scale(1.03);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    color: white;
+    cursor: pointer;
+}
+
+.btn-custom:active {
+    background: #1c54b8 !important; /* Fondo aún más oscuro al hacer clic */
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.fixed-bottom {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 1000;
+    background-color: rgb(0, 0, 0); /* Fondo opcional para el área del botón */
+    padding: 12px 0;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0); /* Sombra para destacar el botón */
+}
+
+        /* Estilo para el popup */
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .popup-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Estilo para cartones seleccionados */
+        .carton-selected {
+            border: 2px solid #479e00c7 !important;
+            background-color: #9bff77 !important;
+        }
+
+        .carton-selected .texto {
+            color: #182518 !important;
+        }
+
+        /* Imagen en el popup */
+        .popup-content img {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+        }
+
+        .availability-bar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            background-color: #e0e0e0; /* Fondo de la barra completa */
+            border-radius: 5px;
+            overflow: hidden;
+            height: 40px;
+            width: 80%; /* Ancho completo */
+            margin-bottom: 10px;
+            position: relative; /* Necesario para posicionar el texto */
+        }
+
+        .availability-bar .remaining {
+            background-color: #4caf50; /* Color de la barra de progreso */
+            height: 100%;
+            transition: width 0.3s ease; /* Animación suave */
+        }
+
+        .availability-text {
+            position: absolute; /* Centra el texto sobre la barra */
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            color: #000000;
+            font-weight: bold;
+            pointer-events: none; /* Evita que el texto interfiera con clics */
+        }
+            /* ── Contacto Oficial Esquina ── */
+        .official-contact {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background-color: rgba(26, 26, 26, 0.85);
+            border: 1px solid #4da6ff;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #e9ecef;
+            font-size: 0.85rem;
+            text-align: right;
+            z-index: 1050;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        .official-contact h5 {
+            color: #4da6ff;
+            font-size: 1.05rem;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+        .official-contact p {
+            margin: 0;
+            line-height: 1.4;
+        }
+        .official-contact .warning {
+            color: #ff4d4d; /* Rojo para la alerta */
+            font-size: 0.8rem;
+            margin-top: 6px;
+            font-weight: bold;
+        }
+
+        /* En móviles lo centramos debajo del logo para que no estorbe */
+        @media (max-width: 768px) {
+            .official-contact {
+                position: relative;
+                top: 0;
+                right: 0;
+                text-align: center;
+                margin: 15px auto 0 auto;
+                width: 90%;
+                max-width: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+     <div class="official-contact">
+        <h5>Bingo De La Suerte</h5>
+        <p>Único contacto Oficial</p>
+        <p><strong>Cesar Díaz Telf: 0416-609-3487</strong></p>
+        <p class="warning">¡No caigas en estafas con otros números!</p>
+    </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Use the new class 'custom-table' instead of '.table'
+        let table = document.querySelector(".custom-table tbody");
+        let rows = Array.from(table.querySelectorAll("tr"));
+
+        // Convertir las filas a un array con datos relevantes
+        let data = rows.map(row => {
+            // Change the index to 1 to target the 'Cantidad' column
+            let cantidadCell = row.cells[1];
+            let cantidad = parseInt(cantidadCell.textContent.trim()) || 0;
+            return { row, cantidad };
+        });
+
+        // Ordenar de mayor a menor según la cantidad
+        data.sort((a, b) => b.cantidad - a.cantidad);
+
+        // Tomar solo el top 5
+        let top5 = data.slice(0, 5);
+
+        // Agregar una columna de numeración a cada fila del top 5
+        top5.forEach((item, index) => {
+            let numCell = document.createElement("td");
+            numCell.textContent = index + 1; // Enumeración desde 1
+            // You might not need 'clickable-cell' here
+            numCell.classList.add("clickable-cell");
+            item.row.insertBefore(numCell, item.row.firstChild);
+        });
+
+        // Modificar el encabezado para incluir la numeración
+        let thead = document.querySelector(".custom-table thead tr");
+        let numHeader = document.createElement("th");
+        numHeader.textContent = "#"; // Encabezado de numeración
+        thead.insertBefore(numHeader, thead.firstChild);
+
+        // Limpiar la tabla y agregar solo el top 5 con la nueva columna
+        table.innerHTML = "";
+        top5.forEach(item => table.appendChild(item.row));
+    });
+</script>
+
+
+
+    <center>
+    <img src="/static/img/logo.png" style="width: 15%; margin-bottom: -45px;" alt="">
+</center>
+
+
+
+    <div class="container mt-5">
+        <center>
+                    <div class="availability-bar">
+            <div class="remaining" id="remaining-bar"></div>
+            <div class="availability-text" id="availability-text">QUEDAN {{ porcentaje }}%</div>
+        </div>
+        <div >
+            <strong class="text-center" style="font-size: 1.3rem; color: rgb(221, 0, 0);">Cada carton cuesta {{ precio }}bs</strong>
+        </div>
+<button
+    class="verify btn btn-custom"
+    style="margin-top: 3px; font-size: 1.2rem; padding: 0.7rem 1.8rem; border-radius: 10px; background: linear-gradient(90deg, #2575fc 0%, #6a11cb 100%); color: #fff; border: none; box-shadow: 0 4px 12px rgba(38,117,252,0.15); font-weight: bold; letter-spacing: 1px; transition: background 0.3s, transform 0.2s;"
+    onmouseover="this.style.background='linear-gradient(90deg, #1e5fd0 0%, #4e0fa2 100%)'; this.style.transform='scale(1.04)';"
+    onmouseout="this.style.background='linear-gradient(90deg, #2575fc 0%, #6a11cb 100%)'; this.style.transform='scale(1)';"
+    onclick="verifyTicket()"
+>
+    Verificar Cartones <span style="font-size: large;">🎫</span>
+</button>
+    </center>
+
+<script>
+
+        function verifyTicket() {
+            window.location.href = '/verify';
+        }
+
+</script>
+
+        <div class="layout-container">
+
+
+
+        <style>
+            .layout-wrapper {
+    gap: 30px; /* Espacio entre la tabla y los cartones */
+}
+
+/* La columna de la izquierda (barra lateral) que contiene la tabla Top 5 */
+.sidebar {
+        display: flex;
+
+        align-items: flex-start; /* Alinea ambas columnas en la parte superior */
+
+    flex: 0 0 230px; /* No crece, no se encoge, y tiene un ancho fijo de 320px */
+}
+.ll{
+color: rgb(34, 213, 249); @media (max-width: 992px) { margin-right: 0; }
+}
+        </style>
+
+
+            <div class="main-content">
+                <div class="ll">
+        <h1
+        class="text-center mb-4">Cartones Disponibles</h1></div>
+        <div class="row justify-content-center">
+{% for carton in cartones[:200] %}            <div class="col-3 col-sm-3 col-md-2 col-lg-1 mb-3 d-flex">
+                <div class="carton-box border text-center rounded shadow-sm" data-carton="{{ carton }}">
+                    <strong class="texto">{{ carton }}</strong>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+        <!-- Fixed-bottom Container -->
+        <div class="fixed-bottom bg-light d-flex justify-content-between align-items-center p-3 border-top">
+            <form id="cartonesForm" action="" method="POST">
+                <input type="hidden" name="cartones" id="cartones">  <!-- Campo para cartones seleccionados -->
+                <input type="hidden" name="total" id="totalPrice">    <!-- Campo para el precio total en bolívares -->
+                <input type="hidden" name="total2" id="totalPrice2">  <!-- Campo para el precio total en dólares -->
+
+                <div class="fixed-bottom bg-light d-flex justify-content-between align-items-center p-3 border-top">
+                    <div class="ms-3">
+                        <strong class="total-price" style="font-size: 1.6rem; color: rgb(4, 132, 223);">Total: $0</strong>
+                    </div>
+                    <div class="mr-3">
+                        <button class="btn btn-custom" style="font-size: large;" type="submit">Confirmar selección</button>
+                    </div>
+                </div>
+            </form>
+                </div>
+                </div>
+
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const cartonesForm = document.getElementById("cartonesForm");
+                    const venta = "{{ venta }}"; // Pasamos la variable `venta` desde el backend asegurando que se convierta en un número válido
+
+                    // Cambiar el action dinámicamente
+                    if (venta === 'dos') {
+                        cartonesForm.action = "{{ url_for('pago2') }}";
+                    } else {
+                        cartonesForm.action = "{{ url_for('pago') }}";
+                    }
+                });
+
+
+                        function updateAvailabilityBar(porcentaje) {
+    const remainingBar = document.getElementById('remaining-bar');
+    const availabilityText = document.getElementById('availability-text');
+
+    // Asegúrate de que el porcentaje sea un número válido
+    const porcentajeNumerico = parseFloat(porcentaje);
+
+    if (!isNaN(porcentajeNumerico) && porcentajeNumerico >= 0 && porcentajeNumerico <= 100) {
+        // Actualiza el ancho de la barra
+        remainingBar.style.width = `${porcentajeNumerico}%`;
+
+        // Actualiza el texto dentro de la barra
+        availabilityText.textContent = `QUEDAN ${porcentajeNumerico}%`;
+    } else {
+        console.error('El porcentaje proporcionado no es válido:', porcentaje);
+    }
+}
+
+// Llama a la función con el porcentaje dinámico
+
+const porcentaje = {{ porcentaje | tojson }}; // Flask inyecta el valor
+updateAvailabilityBar(porcentaje);
+
+            </script>
+
+
+
+
+    <!-- Popup -->
+    <div class="popup-overlay">
+        <div class="popup-content">
+            <img src="" alt="Imagen del Cartón" class="img-fluid mb-3">
+            <div class="buttons">
+                <button class="btn btn-success btn-sm select-btn">Seleccionar</button>
+                <button class="btn btn-danger btn-sm deselect-btn">Deseleccionar</button>
+            </div>
+        </div>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    alert("{{ message }}");
+                });
+            </script>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js" integrity="sha512-8BHxHDLsOHx+flIrQ0DrZcea7MkHqRU5GbTHmbdzMRnAaoCIkZ97PqZcXJkKZckMMhqfoeaJE+DNUVuyoQsO3Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+       $(document).ready(function () {
+    let selectedCartones = [];
+    let basePrice = `{{ precio }}`; // Precio base por cartón
+    let basePrice2 = `{{ precio_dolares }}`; // Precio base en dólares
+    let isThreeForTwoMode = `{{ modalidad }}`; // Cambiar a `true` para activar la promoción 3x2
+
+    $(".carton-box").click(function () {
+        const cartonNumber = $(this).data("carton");
+        $(".popup-overlay").fadeIn();
+        const imageUrl = `/static/cartones/Carton ${cartonNumber}.png`;
+        $(".popup-content img").attr("src", imageUrl);
+        $(".popup-content img").attr("alt", "Cartón " + cartonNumber);
+        $(".popup-content").data("carton", cartonNumber);
+    });
+
+    $(".popup-overlay").click(function (e) {
+        if ($(e.target).is(".popup-overlay")) {
+            $(".popup-overlay").fadeOut();
+        }
+    });
+
+    $(".select-btn").click(function () {
+        const cartonNumber = $(".popup-content").data("carton");
+        const cartonElement = $(`.carton-box[data-carton='${cartonNumber}']`);
+
+        if (!selectedCartones.includes(cartonNumber)) {
+            selectedCartones.push(cartonNumber);
+            cartonElement.addClass("carton-selected");
+            updateTotalPrice();
+        } else {
+            alert("Cartón " + cartonNumber + " ya está seleccionado.");
+        }
+        $(".popup-overlay").fadeOut();
+    });
+
+    $(".deselect-btn").click(function () {
+        const cartonNumber = $(".popup-content").data("carton");
+        const index = selectedCartones.indexOf(cartonNumber);
+        const cartonElement = $(`.carton-box[data-carton='${cartonNumber}']`);
+
+        if (index !== -1) {
+            selectedCartones.splice(index, 1);
+            cartonElement.removeClass("carton-selected");
+            updateTotalPrice();
+        } else {
+            alert("Cartón " + cartonNumber + " no está seleccionado.");
+        }
+        $(".popup-overlay").fadeOut();
+    });
+
+    function calculateTotalPrice(basePriceValue) {
+        let total = 0;
+
+        if (isThreeForTwoMode === "Activado") {
+            const freeCount = Math.floor(selectedCartones.length / 3); // Cada tercer cartón es gratis
+            total = (selectedCartones.length - freeCount) * basePriceValue;
+        } else {
+            total = selectedCartones.length * basePriceValue; // Modo precio fijo
+        }
+
+        return total;
+    }
+
+    function updateTotalPrice() {
+        const total = calculateTotalPrice(basePrice);
+        const totalDollars = calculateTotalPrice(basePrice2);
+
+        $(".total-price").text("Total: " + total + "bs");
+
+        // Actualizamos los campos ocultos en el formulario con los datos
+        $("#cartones").val(selectedCartones); // Enviar directamente el array sin transformarlo
+        $("#totalPrice").val(total);  // Total en bolívares
+        $("#totalPrice2").val(totalDollars);  // Total en dólares
+    }
+    // Validación antes de enviar el formulario
+$("#cartonesForm").submit(function (e) {
+    if (selectedCartones.length === 0) {
+        alert("Por favor, selecciona al menos un cartón antes de continuar.");
+        e.preventDefault(); // Evitar que el formulario se envíe
+    } else {
+        // Verificar que `selectedCartones` sea un array válido
+        const isValidArray = Array.isArray(selectedCartones) && selectedCartones.every(Number.isInteger);
+        if (!isValidArray) {
+            alert("El formato de los cartones seleccionados es inválido.");
+            e.preventDefault(); // Evitar que el formulario se envíe
+        }
+    }
+});
+
+    // Iniciar la actualización del precio total
+    updateTotalPrice();
+});
+
+
+
+
+    </script>
+
+</body>
+</html>
+
+
+
+
