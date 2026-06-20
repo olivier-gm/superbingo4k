@@ -349,7 +349,7 @@ def admin_index():
         username = request.form.get("username")
         password = request.form.get("password")
 
-        if username == "admin" and password == "admin456**":
+        if username == "admin" and password == "admin123**":
             session['logged_in'] = True  # Establece que el usuario está autenticado
             return redirect(url_for('admin_dashboard'))  # redirigir a un panel de administración
         else:
