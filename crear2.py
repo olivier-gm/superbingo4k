@@ -14,7 +14,9 @@ cursor.execute("""
     zelle TEXT,
     estatus TEXT,
     modalidad_carton_regalo TEXT,
-    recompensa REAL
+    recompensa REAL,
+    imagen TEXT,
+    total_cartones INTEGER DEFAULT 200
                );
 """)
 
@@ -53,9 +55,9 @@ CREATE TABLE IF NOT EXISTS requeridos (
 
 # Insertar una fila inicial con valores por defecto si no hay registros
 cursor.execute("""
-            INSERT INTO partida (partida, recompensa, precio_de_carton, modalidad_carton_regalo, estatus)
-            VALUES (?, ?, ?, ?, ?);
-        """, ("", "", 0.0, "", "Venta finalizada"))
+            INSERT INTO partida (partida, recompensa, precio_de_carton, modalidad_carton_regalo, estatus, imagen, total_cartones)
+            VALUES (?, ?, ?, ?, ?, ?, ?);
+        """, ("", "", 0.0, "", "Venta finalizada", "logo.png", 200))
 conn.commit()
 
 # Confirmar los cambios y cerrar la conexión

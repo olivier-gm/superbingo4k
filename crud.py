@@ -108,19 +108,19 @@ def obtener_datos_partida():
     conn = sqlite3.connect('bingo.db')
     cursor = conn.cursor()
 
-    # Crear la consulta para obtener el dato específico
-    cursor.execute("SELECT estatus, partida, recompensa, precio_de_carton, precio_dolar, zelle, modalidad_carton_regalo FROM partida WHERE id = 1")
+    # Crear la consulta para obtener el dato específico (incluyendo imagen y total_cartones)
+    cursor.execute("SELECT estatus, partida, recompensa, precio_de_carton, precio_dolar, zelle, modalidad_carton_regalo, imagen, total_cartones FROM partida WHERE id = 1")
     resultado = cursor.fetchone()
     conn.commit()
 
-    if resultado[0] == "Venta finalizada":
-
+    if resultado and resultado[0] == "Venta finalizada":
+        limite = resultado[8] if resultado[8] else 200
         cursor.execute("""DELETE FROM cartones_disponibles WHERE 1 = 1""")
         conn.commit()
 
         cursor.executemany("""
         INSERT OR IGNORE INTO cartones_disponibles (carton_disponible) VALUES (?);
-        """, [(i,) for i in range(1, 201)])
+        """, [(i,) for i in range(1, limite + 1)])
         conn.commit()
 
 
@@ -132,7 +132,7 @@ def obtener_datos_partida():
 
 
 
-def actualizar_partida(fecha_enunciado=None, recompensa=None, precio_carton=None, tipo_carton=None, action=None, precio_dolares=None, zelle=None):
+def actualizar_partida(fecha_enunciado=None, recompensa=None, precio_carton=None, tipo_carton=None, action=None, precio_dolares=None, zelle=None, imagen=None, total_cartones=None):
     import sqlite3
 
     # Conectar a la base de datos
@@ -146,9 +146,9 @@ def actualizar_partida(fecha_enunciado=None, recompensa=None, precio_carton=None
     if count == 0:
         # Insertar una fila inicial con valores por defecto si no hay registros
         cursor.execute("""
-            INSERT INTO partida (partida, recompensa, precio_de_carton, modalidad_carton_regalo, estatus)
-            VALUES (?, ?, ?, ?, ?);
-        """, ("", "", 0.0, "", "Venta finalizada"))
+            INSERT INTO partida (partida, recompensa, precio_de_carton, modalidad_carton_regalo, estatus, imagen, total_cartones)
+            VALUES (?, ?, ?, ?, ?, ?, ?);
+        """, ("", "", 0.0, "", "Venta finalizada", "logo.png", 200))
         conn.commit()
 
     # Construcción dinámica de los campos y valores para el comando UPDATE
@@ -163,11 +163,11 @@ def actualizar_partida(fecha_enunciado=None, recompensa=None, precio_carton=None
         fields.append("recompensa = ?")
         values.append(recompensa)
 
-    if precio_carton:  # precio_carton puede ser 0, por eso se usa `is not None`
+    if precio_carton is not None:  # precio_carton puede ser 0, por eso se usa `is not None`
         fields.append("precio_de_carton = ?")
         values.append(precio_carton)
 
-    if precio_dolares:  # precio_carton puede ser 0, por eso se usa `is not None`
+    if precio_dolares is not None:  # precio_dolares puede ser 0, por eso se usa `is not None`
         fields.append("precio_dolar = ?")
         values.append(precio_dolares)
 
@@ -182,6 +182,14 @@ def actualizar_partida(fecha_enunciado=None, recompensa=None, precio_carton=None
     if action:
         fields.append("estatus = ?")
         values.append(action)
+
+    if imagen:
+        fields.append("imagen = ?")
+        values.append(imagen)
+
+    if total_cartones is not None:
+        fields.append("total_cartones = ?")
+        values.append(total_cartones)
 
     # Actualizar la fila solo si hay campos a modificar
     if fields:
@@ -597,11 +605,61 @@ def get_porcentaje(flag):
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(carton_disponible) FROM cartones_disponibles")
     cantidad = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT total_cartones FROM partida WHERE id = 1")
+    res_total = cursor.fetchone()
+    total = res_total[0] if res_total and res_total[0] else 200
     conn.close()
+    
     if flag == False:
         return cantidad
 
     # Calcular el porcentaje
-    total = 200
     porcentaje = (cantidad / total) * 100
     return round(porcentaje, 2)
+
+def get_imagen():
+    conn = sqlite3.connect('bingo.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT imagen FROM partida WHERE id = 1")
+    res = cursor.fetchone()
+    conn.close()
+    return res[0] if res and res[0] else "logo.png"
+
+def asignar_cartones_aleatorios(cantidad, session_id):
+    conn = sqlite3.connect('bingo.db')
+    cursor = conn.cursor()
+    
+    # 1. Limpiar cartones expirados
+    cursor.execute("DELETE FROM cartones_temporales WHERE timestamp <= datetime('now', '-25 minutes')")
+    conn.commit()
+    
+    # 2. Seleccionar N cartones aleatorios que estén disponibles y no reservados por otros
+    cursor.execute("""
+        SELECT carton_disponible FROM cartones_disponibles
+        WHERE carton_disponible NOT IN (
+            SELECT carton FROM cartones_temporales WHERE session_id != ?
+        )
+        ORDER BY RANDOM()
+        LIMIT ?
+    """, (session_id, cantidad))
+    
+    cartones = [str(row[0]) for row in cursor.fetchall()]
+    
+    # 3. Reservar para esta sesión si encontramos cartones
+    if cartones:
+        cursor.execute("DELETE FROM cartones_temporales WHERE session_id = ?", (session_id,))
+        cartones_para_insertar = [(c, session_id) for c in cartones]
+        cursor.executemany("INSERT INTO cartones_temporales (carton, session_id) VALUES (?, ?)", cartones_para_insertar)
+        conn.commit()
+        
+    conn.close()
+    return cartones
+
+def get_limite_cartones():
+    conn = sqlite3.connect('bingo.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT total_cartones FROM partida WHERE id = 1")
+    res = cursor.fetchone()
+    conn.close()
+    return res[0] if res and res[0] else 200

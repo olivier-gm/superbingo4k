@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
 from flask_socketio import SocketIO, emit
-from crud import get_datatop, obtener_comprador_por_cedula, get_porcentaje, cartones_disponibles,cartones_usados,reintegrar_cartones,get_data,actualizar_partida,obtener_datos_partida, get_enunciado, get_premio, insertar_comprador, get_estatus, get_precio, vendidos, get_modalidad, get_dolar, get_zelle
-from crud2 import get_datatop2, get_porcentaje2, cartones_disponibles2,cartones_usados2,reintegrar_cartones2,get_data2,actualizar_partida2,obtener_datos_partida2, get_enunciado2, get_premio2, insertar_comprador2, get_estatus2, get_precio2, vendidos2, get_modalidad2, get_dolar2, get_zelle2
+from crud import get_datatop, obtener_comprador_por_cedula, get_porcentaje, cartones_disponibles,cartones_usados,reintegrar_cartones,get_data,actualizar_partida,obtener_datos_partida, get_enunciado, get_premio, insertar_comprador, get_estatus, get_precio, vendidos, get_modalidad, get_dolar, get_zelle, get_imagen, asignar_cartones_aleatorios, get_limite_cartones
+from crud2 import get_datatop2, get_porcentaje2, cartones_disponibles2,cartones_usados2,reintegrar_cartones2,get_data2,actualizar_partida2,obtener_datos_partida2, get_enunciado2, get_premio2, insertar_comprador2, get_estatus2, get_precio2, vendidos2, get_modalidad2, get_dolar2, get_zelle2, get_imagen2, asignar_cartones_aleatorios2
 import os
 from werkzeug.utils import secure_filename
 from functools import wraps
@@ -57,8 +57,33 @@ def init_db2():
         ''')
         conn.commit()
 
+def check_and_upgrade_db():
+    # 1. ensure columns in cartones_temporales and partida tables
+    for db_name in ["bingo.db", "bingo2.db"]:
+        try:
+            with sqlite3.connect(db_name) as conn:
+                cursor = conn.cursor()
+                cursor.execute("PRAGMA table_info(cartones_temporales)")
+                columns = [row[1] for row in cursor.fetchall()]
+                if 'session_id' not in columns:
+                    cursor.execute("ALTER TABLE cartones_temporales ADD COLUMN session_id TEXT")
+                    conn.commit()
+                
+                cursor.execute("PRAGMA table_info(partida)")
+                columns_partida = [row[1] for row in cursor.fetchall()]
+                if 'imagen' not in columns_partida:
+                    cursor.execute("ALTER TABLE partida ADD COLUMN imagen TEXT DEFAULT 'logo.png'")
+                    conn.commit()
+                
+                if 'total_cartones' not in columns_partida:
+                    cursor.execute("ALTER TABLE partida ADD COLUMN total_cartones INTEGER DEFAULT 200")
+                    conn.commit()
+        except Exception as e:
+            print(f"Error checking/upgrading db {db_name}: {e}")
+
 init_db()
 init_db2()
+check_and_upgrade_db()
 
 
 def allowed_file(filename):
@@ -76,68 +101,60 @@ def generar_sufijo_aleatorio(length=6):
     caracteres = string.ascii_letters + string.digits
     return ''.join(random.choices(caracteres, k=length))
 
+def calcular_precio_total(cantidad, precio_unitario, modalidad):
+    if modalidad == "Activado":
+        regalo = cantidad // 3
+        cantidad_a_pagar = cantidad - regalo
+    else:
+        cantidad_a_pagar = cantidad
+    return cantidad_a_pagar * precio_unitario
+
 @app.route("/cartones", methods=["GET"])
 def imprimir_cartones():
     estatus = get_estatus()
     if estatus == "Venta finalizada":
         return redirect(url_for('index'))  # redirigir a un panel de administración
 
-    cartones_tuplas = cartones_disponibles(read="*")
-    cartones = [carton[0] for carton in cartones_tuplas]
-
-    return render_template("seleccion_cartones.html", cartones=cartones,
-                           precio=int(get_precio()), modalidad=get_modalidad(),
-                           precio_dolares=get_dolar(), venta='uno', porcentaje = get_porcentaje(True), solicitudes = get_datatop())
+    return render_template("seleccion_cartones.html",
+                           enunciado=get_enunciado(),
+                           porcentaje=get_porcentaje(True),
+                           disponibilidad=get_porcentaje(False),
+                           precio=int(get_precio()),
+                           precio_dolares=get_dolar(),
+                           modalidad=get_modalidad(),
+                           venta='uno',
+                           imagen=get_imagen())
 
 
 @app.route("/compra", methods=["POST", "GET"])
 def pago():
     if request.method == "POST":
         # --- 1. Gestión de la Sesión del Usuario ---
-        # Si el usuario no tiene una sesión, le creamos una.
         if 'session_id' not in session:
             session['session_id'] = str(uuid.uuid4())
         user_session_id = session['session_id']
 
-        cartones_seleccionados = request.form.getlist("cartones")
-        if len(cartones_seleccionados) == 1 and ',' in cartones_seleccionados[0]:
-            cartones_seleccionados = cartones_seleccionados[0].split(',')
+        try:
+            cantidad = int(request.form.get("cantidad", 1))
+        except ValueError:
+            cantidad = 1
 
-        with sqlite3.connect("bingo.db") as conn:
-            cursor = conn.cursor()
-            # Limpiamos los cartones expirados de CUALQUIER sesión
-            cursor.execute("DELETE FROM cartones_temporales WHERE timestamp <= datetime('now', '-25 minutes')")
-            conn.commit()
+        cartones_seleccionados = asignar_cartones_aleatorios(cantidad, user_session_id)
+        
+        if not cartones_seleccionados:
+            flash("No hay suficientes cartones disponibles en este momento.", "warning")
+            return redirect(url_for("imprimir_cartones"))
 
-            # --- 2. Verificación de Duplicados (Modificada) ---
-            # Ahora buscamos cartones que estén en la DB pero que NO pertenezcan a la sesión del usuario actual.
-            placeholders = ', '.join('?' for _ in cartones_seleccionados)
-            sql_query = f"SELECT carton FROM cartones_temporales WHERE carton IN ({placeholders}) AND session_id != ?"
+        if len(cartones_seleccionados) < cantidad:
+            flash(f"Solo se pudieron asignar {len(cartones_seleccionados)} cartones.", "warning")
 
-            # Los parámetros ahora incluyen el ID de la sesión del usuario al final
-            params = cartones_seleccionados + [user_session_id]
-            cursor.execute(sql_query, params)
-            duplicados = cursor.fetchall()
-
-            if duplicados:
-                # La lógica para mostrar el error si hay duplicados no cambia.
-                duplicados_list = [carton[0] for carton in duplicados]
-                if len(duplicados_list) == 1:
-                    flash(f"El cartón {duplicados_list[0]} ya ha sido seleccionado por otro usuario.", "warning")
-                else:
-                    flash(f"Los cartones {', '.join(duplicados_list)} ya han sido seleccionados por otro usuario.", "warning")
-                return redirect(url_for("imprimir_cartones"))
-
-            # --- 3. Inserción en la Base de Datos (Modificada) ---
-            # Primero, borramos la selección ANTERIOR de este mismo usuario para evitar conflictos.
-            cursor.execute("DELETE FROM cartones_temporales WHERE session_id = ?", (user_session_id,))
-
-            # Insertamos los nuevos cartones asociándolos a la sesión del usuario.
-            cartones_para_insertar = [(c, user_session_id) for c in cartones_seleccionados]
-            cursor.executemany("INSERT INTO cartones_temporales (carton, session_id) VALUES (?, ?)", cartones_para_insertar)
-            conn.commit()
-        total_price = float(request.form["total"])  # Total en bolívares
-        total_price_2 = float(request.form["total2"])  # Total en dólares
+        # Calcular precios en el backend
+        precio_bs = float(get_precio())
+        precio_usd = float(get_dolar())
+        modalidad = get_modalidad()
+        
+        total_price = calcular_precio_total(len(cartones_seleccionados), precio_bs, modalidad)
+        total_price_2 = calcular_precio_total(len(cartones_seleccionados), precio_usd, modalidad)
 
         # Pasar los valores al template
         return render_template(
@@ -215,63 +232,46 @@ def imprimir_cartones2():
     if estatus == "Venta finalizada":
         return redirect(url_for('index'))  # redirigir a un panel de administración
 
-    cartones_tuplas = cartones_disponibles2(read="*")
-    cartones = [carton[0] for carton in cartones_tuplas]
-
-    return render_template("seleccion_cartones.html", cartones=cartones,
-                           precio=int(get_precio2()), modalidad=get_modalidad2(),
-                           precio_dolares=get_dolar2(), venta='dos', porcentaje=get_porcentaje2(True), solicitudes = get_datatop2())
+    return render_template("seleccion_cartones.html",
+                           enunciado=get_enunciado2(),
+                           porcentaje=get_porcentaje2(True),
+                           disponibilidad=get_porcentaje2(False),
+                           precio=int(get_precio2()),
+                           precio_dolares=get_dolar2(),
+                           modalidad=get_modalidad2(),
+                           venta='dos',
+                           imagen=get_imagen2())
 
 
 @app.route("/compra2", methods=["POST", "GET"])
 def pago2():
     if request.method == "POST":
         # --- 1. Gestión de la Sesión del Usuario ---
-        # Si el usuario no tiene una sesión, le creamos una.
         if 'session_id' not in session:
             session['session_id'] = str(uuid.uuid4())
         user_session_id = session['session_id']
 
-        cartones_seleccionados = request.form.getlist("cartones")
-        if len(cartones_seleccionados) == 1 and ',' in cartones_seleccionados[0]:
-            cartones_seleccionados = cartones_seleccionados[0].split(',')
+        try:
+            cantidad = int(request.form.get("cantidad", 1))
+        except ValueError:
+            cantidad = 1
 
-        with sqlite3.connect("bingo2.db") as conn:
-            cursor = conn.cursor()
-            # Limpiamos los cartones expirados de CUALQUIER sesión
-            cursor.execute("DELETE FROM cartones_temporales WHERE timestamp <= datetime('now', '-25 minutes')")
-            conn.commit()
+        cartones_seleccionados = asignar_cartones_aleatorios2(cantidad, user_session_id)
+        
+        if not cartones_seleccionados:
+            flash("No hay suficientes cartones disponibles en este momento.", "warning")
+            return redirect(url_for("imprimir_cartones2"))
 
-            # --- 2. Verificación de Duplicados (Modificada) ---
-            # Ahora buscamos cartones que estén en la DB pero que NO pertenezcan a la sesión del usuario actual.
-            placeholders = ', '.join('?' for _ in cartones_seleccionados)
-            sql_query = f"SELECT carton FROM cartones_temporales WHERE carton IN ({placeholders}) AND session_id != ?"
+        if len(cartones_seleccionados) < cantidad:
+            flash(f"Solo se pudieron asignar {len(cartones_seleccionados)} cartones.", "warning")
 
-            # Los parámetros ahora incluyen el ID de la sesión del usuario al final
-            params = cartones_seleccionados + [user_session_id]
-            cursor.execute(sql_query, params)
-            duplicados = cursor.fetchall()
-
-            if duplicados:
-                # La lógica para mostrar el error si hay duplicados no cambia.
-                duplicados_list = [carton[0] for carton in duplicados]
-                if len(duplicados_list) == 1:
-                    flash(f"El cartón {duplicados_list[0]} ya ha sido seleccionado por otro usuario.", "warning")
-                else:
-                    flash(f"Los cartones {', '.join(duplicados_list)} ya han sido seleccionados por otro usuario.", "warning")
-                return redirect(url_for("imprimir_cartones2"))
-
-            # --- 3. Inserción en la Base de Datos (Modificada) ---
-            # Primero, borramos la selección ANTERIOR de este mismo usuario para evitar conflictos.
-            cursor.execute("DELETE FROM cartones_temporales WHERE session_id = ?", (user_session_id,))
-
-            # Insertamos los nuevos cartones asociándolos a la sesión del usuario.
-            cartones_para_insertar = [(c, user_session_id) for c in cartones_seleccionados]
-            cursor.executemany("INSERT INTO cartones_temporales (carton, session_id) VALUES (?, ?)", cartones_para_insertar)
-            conn.commit()
-
-        total_price = float(request.form["total"])   # Total en bolívares
-        total_price_2 = float(request.form["total2"])  # Total en dólares
+        # Calcular precios en el backend
+        precio_bs = float(get_precio2())
+        precio_usd = float(get_dolar2())
+        modalidad = get_modalidad2()
+        
+        total_price = calcular_precio_total(len(cartones_seleccionados), precio_bs, modalidad)
+        total_price_2 = calcular_precio_total(len(cartones_seleccionados), precio_usd, modalidad)
 
         return render_template(
             "comprar.html",
@@ -379,7 +379,60 @@ def admin_dashboard_partida():
         tipo_carton = request.form.get("tipoCarton")
         precio_dolares = request.form.get("precioCarton$")
         zelle = request.form.get("zelle")
-        actualizar_partida(fecha_enunciado, recompensa, precio_carton, tipo_carton, action, precio_dolares, zelle)
+        
+        # Procesar subida de imagen
+        imagen_file = request.files.get("imagen")
+        imagen_filename = None
+        if imagen_file and allowed_file(imagen_file.filename):
+            filename = secure_filename(imagen_file.filename)
+            sufijo = generar_sufijo_aleatorio()
+            nombre_archivo, extension = os.path.splitext(filename)
+            filename = f"raffle_{sufijo}{extension}"
+            filepath = os.path.join('static/img', filename)
+            imagen_file.save(filepath)
+            imagen_filename = filename
+
+        # Límite de cartones dinámico
+        total_cartones_val = request.form.get("totalCartones")
+        total_cartones = None
+        if total_cartones_val:
+            try:
+                val = int(total_cartones_val)
+                if 100 <= val <= 5000:
+                    total_cartones = val
+                else:
+                    flash("El límite de cartones debe estar entre 100 y 5000.", "danger")
+            except ValueError:
+                pass
+
+        # Si el límite cambió, reiniciamos automáticamente la disponibilidad y DB
+        current_limit = get_limite_cartones()
+        if total_cartones is not None and total_cartones != current_limit:
+            actualizar_partida(fecha_enunciado, recompensa, precio_carton, tipo_carton, action, precio_dolares, zelle, imagen_filename, total_cartones)
+            
+            # Reiniciar base de datos
+            conn = sqlite3.connect('bingo.db')
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM cartones_disponibles")
+            cursor.execute("DELETE FROM requeridos")
+            cursor.execute("DELETE FROM cartones_temporales")
+            cursor.executemany("""
+            INSERT OR IGNORE INTO cartones_disponibles (carton_disponible) VALUES (?);
+            """, [(i,) for i in range(1, total_cartones + 1)])
+            conn.commit()
+            conn.close()
+
+            # Eliminar comprobantes
+            folder_path = 'static/comprobantes/'
+            if os.path.exists(folder_path):
+                for filename in os.listdir(folder_path):
+                    file_path = os.path.join(folder_path, filename)
+                    if os.path.isfile(file_path):
+                        os.remove(file_path)
+            flash(f"Límite de cartones actualizado a {total_cartones} y base de datos reiniciada.", "success")
+        else:
+            actualizar_partida(fecha_enunciado, recompensa, precio_carton, tipo_carton, action, precio_dolares, zelle, imagen_filename)
+
         return redirect(url_for('admin_dashboard_partida'))  # redirigir a un panel de administración
     return render_template("admin_partida.html", datos=datos, venta='uno')
 
@@ -389,6 +442,7 @@ def admin_dashboard_partida():
 @login_required  # Ruta protegida por login
 def reiniciar():
 
+    limite = get_limite_cartones()
     conn = sqlite3.connect('bingo.db')
     cursor = conn.cursor()
 
@@ -398,14 +452,17 @@ def reiniciar():
     cursor.execute("""DELETE FROM requeridos WHERE 1 = 1""")
     conn.commit()
 
+    cursor.execute("""DELETE FROM cartones_temporales WHERE 1 = 1""")
+    conn.commit()
+
     cursor.executemany("""
     INSERT OR IGNORE INTO cartones_disponibles (carton_disponible) VALUES (?);
-    """, [(i,) for i in range(1, 201)])
+    """, [(i,) for i in range(1, limite + 1)])
     conn.commit()
 
     conn.close()
 
-        # Eliminar todos los archivos en /static/comprobantes/
+    # Eliminar todos los archivos en /static/comprobantes/
     folder_path = 'static/comprobantes/'
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
@@ -600,7 +657,20 @@ def admin_dashboard_partida2():
         tipo_carton = request.form.get("tipoCarton")
         precio_dolares = request.form.get("precioCarton$")
         zelle = request.form.get("zelle")
-        actualizar_partida2(fecha_enunciado, recompensa, precio_carton, tipo_carton, action, precio_dolares, zelle)
+        
+        # Procesar subida de imagen
+        imagen_file = request.files.get("imagen")
+        imagen_filename = None
+        if imagen_file and allowed_file(imagen_file.filename):
+            filename = secure_filename(imagen_file.filename)
+            sufijo = generar_sufijo_aleatorio()
+            nombre_archivo, extension = os.path.splitext(filename)
+            filename = f"raffle2_{sufijo}{extension}"
+            filepath = os.path.join('static/img', filename)
+            imagen_file.save(filepath)
+            imagen_filename = filename
+
+        actualizar_partida2(fecha_enunciado, recompensa, precio_carton, tipo_carton, action, precio_dolares, zelle, imagen_filename)
         return redirect(url_for('admin_dashboard_partida2'))  # redirigir a un panel de administración
     return render_template("admin_partida.html", datos=datos, venta='dos')
 

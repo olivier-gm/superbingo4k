@@ -146,9 +146,9 @@
                 <div class="cartones-container">
                     {% for carton in cartones %}
                         <div class="carton">
-                            <img src="{{ url_for('static', filename='cartones/Carton ' ~ carton|string ~ '.png') }}" alt="Cartón {{ carton }}" onclick="mostrarVistaPrevia('{{ carton }}')" />
+                            <img src="{{ url_for('static', filename='cartones/C (' ~ carton|string ~ ').jpg') }}" alt="Cartón {{ carton }}" onclick="mostrarVistaPrevia('{{ carton }}')" />
                             <p>Cartón {{ carton }}</p>
-                            <a href="{{ url_for('static', filename='cartones/Carton ' ~ carton|string ~ '.png') }}" class="btn-descargar" download>Descargar</a>
+                            <a href="{{ url_for('static', filename='cartones/C (' ~ carton|string ~ ').jpg') }}" class="btn-descargar" download>Descargar</a>
                         </div>
                     {% endfor %}
                 </div>
@@ -161,9 +161,9 @@
                 <div class="cartones-container">
                     {% for carton in cartones2 %}
                         <div class="carton">
-                            <img src="{{ url_for('static', filename='cartones/Carton ' ~ carton|string ~ '.png') }}" alt="Cartón {{ carton }}" onclick="mostrarVistaPrevia('{{ carton }}')" />
+                            <img src="{{ url_for('static', filename='cartones/C (' ~ carton|string ~ ').jpg') }}" alt="Cartón {{ carton }}" onclick="mostrarVistaPrevia('{{ carton }}')" />
                             <p>Cartón {{ carton }}</p>
-                            <a href="{{ url_for('static', filename='cartones/Carton ' ~ carton|string ~ '.png') }}" class="btn-descargar" download>Descargar</a>
+                            <a href="{{ url_for('static', filename='cartones/C (' ~ carton|string ~ ').jpg') }}" class="btn-descargar" download>Descargar</a>
                         </div>
                     {% endfor %}
                 </div>
@@ -184,13 +184,13 @@
         // Función para mostrar la vista previa del cartón
         function mostrarVistaPrevia(carton) {
             const popupImage = document.getElementById('popup-image');
-            popupImage.src = '/static/cartones/Carton ' + carton + '.png';  // Establece la imagen en el popup
-            document.getElementById('popup-overlay'.style.display = 'flex';  // Muestra el popup
+            popupImage.src = '/static/cartones/C (' + carton + ').jpg';  // Establece la imagen en el popup
+            document.getElementById('popup-overlay').style.display = 'flex';  // Muestra el popup
         }
 
         // Función para cerrar la vista previa
         function cerrarVistaPrevia() {
-            document.getElementById('popup-overlay'.style.display = 'none';  // Oculta el popup
+            document.getElementById('popup-overlay').style.display = 'none';  // Oculta el popup
         }
     </script>
 
