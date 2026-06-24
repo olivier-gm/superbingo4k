@@ -69,15 +69,17 @@
 
         /* --- Caja de Información Mejorada --- */
         .info-box {
-            background: linear-gradient(145deg, #ffffff, #f0f4f8);
+            background: rgba(18, 26, 44, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border-radius: 16px;
             padding: 25px;
             margin-top: 30px;
             margin-bottom: 20px;
             width: 90%;
             max-width: 450px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), inset 0 2px 0 rgba(255, 255, 255, 0.8);
-            border: 1px solid #e1e8ed;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(37, 117, 252, 0.1);
+            border: 1px solid rgba(77, 166, 255, 0.25);
             text-align: center;
         }
 
@@ -102,22 +104,22 @@
         }
 
         .info-box .cartones-info {
-            font-size: 1.1rem;
-            color: #333;
-            font-weight: 600;
+            font-size: 1.2rem;
+            color: #f8f9fa;
+            font-weight: 700;
             margin-bottom: 20px;
-            border-bottom: 2px dashed #ccc;
+            border-bottom: 2px dashed rgba(255, 255, 255, 0.2);
             padding-bottom: 15px;
         }
 
         .info-section {
-            background-color: white;
+            background-color: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border: 1px solid #f0f0f0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             text-align: left;
+            color: #f8f9fa;
         }
 
         .info-section h4 {
@@ -177,7 +179,7 @@
         <div class="info-box">
             <p class="premio-title">{{ premio }}</p>
             <div class="precio-alert">Cada cartón cuesta {{ precio }} Bs</div>
-            <!-- <p class="cartones-info">Cartones seleccionados:<br> <span style="color:#007bff;">{{ cartones_seleccionados }}</span></p> -->
+            <p class="cartones-info">Cantidad de cartones: <span style="color:#4da6ff;">{{ cartones_seleccionados.split(',') | length if cartones_seleccionados else 0 }}</span></p>
 
 
 
