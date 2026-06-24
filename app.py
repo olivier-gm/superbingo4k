@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
-from flask_socketio import SocketIO, emit
 from crud import get_datatop, obtener_comprador_por_cedula, get_porcentaje, cartones_disponibles,cartones_usados,reintegrar_cartones,get_data,actualizar_partida,obtener_datos_partida, get_enunciado, get_premio, insertar_comprador, get_estatus, get_precio, vendidos, get_modalidad, get_dolar, get_zelle, get_imagen, asignar_cartones_aleatorios, get_limite_cartones
 from crud2 import get_datatop2, get_porcentaje2, cartones_disponibles2,cartones_usados2,reintegrar_cartones2,get_data2,actualizar_partida2,obtener_datos_partida2, get_enunciado2, get_premio2, insertar_comprador2, get_estatus2, get_precio2, vendidos2, get_modalidad2, get_dolar2, get_zelle2, get_imagen2, asignar_cartones_aleatorios2
 import os
@@ -12,8 +11,6 @@ import string
 import re
 import time
 import uuid # Para generar identificadores únicos de sesión
-
-
 
 
 # Decorador para proteger las rutas
@@ -29,9 +26,7 @@ app = Flask(__name__)
 UPLOAD_FOLDER = 'static/comprobantes'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = 'supersecretkey'
-socketio = SocketIO(app, manage_session=True)
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-
 
 def init_db():
     with sqlite3.connect("bingo.db") as conn:
