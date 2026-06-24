@@ -256,7 +256,7 @@
         <img src="/static/img/logo.png" class="logo-img" alt="SuperBingo Logo">
         
         <div class="raffle-img-container">
-            <img src="/static/img/{{ imagen if imagen else 'logo.png' }}" class="raffle-img" alt="Rifa Imagen">
+            <img src="/static/img/{{ imagen if imagen else 'logo.png' }}" class="raffle-img" alt="Bingo Imagen">
         </div>
 
         <div class="info">
@@ -271,20 +271,14 @@
 
         <form id="cartonesForm" method="POST">
             <div class="select-container">
-                <label for="cantidad" class="select-label">Selecciona la cantidad de cartones a comprar:</label>
-                <select class="form-select custom-select" id="cantidad" name="cantidad" required>
-                    {% for i in range(1, 21) %}
-                        {% if i <= disponibilidad %}
-                            <option value="{{ i }}">{{ i }} cartón(es)</option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
+                <label for="cantidad" class="select-label">Ingresa la cantidad de cartones a comprar:</label>
+                <input type="number" class="form-control custom-select" id="cantidad" name="cantidad" min="1" max="{{ disponibilidad }}" value="1" required style="text-align: center; font-weight: bold;">
             </div>
             
-            <button class="buy" id="buy-button" type="button" onclick="buyTickets()">COMPRAR TICKETS <span style="font-size: larger;">🎫</span></button>
+            <button class="buy" id="buy-button" type="button" onclick="buyTickets()">COMPRAR CARTONES <span style="font-size: larger;">🎫</span></button>
         </form>
 
-        <button class="verify" onclick="verifyTicket()">Verificar Ticket <span style="font-size: large;">🎫</span></button>
+        <button class="verify" onclick="verifyTicket()">Verificar Cartón <span style="font-size: large;">🎫</span></button>
     </div>
 
     <div class="whatsapp">
@@ -335,7 +329,7 @@
         const enunciado = "{{ enunciado }}".trim();
         const disponibilidad = {{ disponibilidad }};
     
-        // Si no hay rifa disponible o disponibilidad es 0, ocultar el botón y el selector
+        // Si no hay bingo disponible o disponibilidad es 0, ocultar el botón y el selector
         if (enunciado === "No disponible" || enunciado === "No hay cartones disponibles" || disponibilidad === 0) {
             document.getElementById("buy-button").style.display = "none";
             document.getElementById("cantidad").style.display = "none";
