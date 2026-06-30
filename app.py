@@ -63,13 +63,13 @@ def check_and_upgrade_db():
                 if 'session_id' not in columns:
                     cursor.execute("ALTER TABLE cartones_temporales ADD COLUMN session_id TEXT")
                     conn.commit()
-                
+
                 cursor.execute("PRAGMA table_info(partida)")
                 columns_partida = [row[1] for row in cursor.fetchall()]
                 if 'imagen' not in columns_partida:
                     cursor.execute("ALTER TABLE partida ADD COLUMN imagen TEXT DEFAULT 'logo.png'")
                     conn.commit()
-                
+
                 if 'total_cartones' not in columns_partida:
                     cursor.execute("ALTER TABLE partida ADD COLUMN total_cartones INTEGER DEFAULT 200")
                     conn.commit()
@@ -135,19 +135,16 @@ def pago():
             cantidad = 1
 
         cartones_seleccionados = asignar_cartones_aleatorios(cantidad, user_session_id)
-        
+
         if not cartones_seleccionados:
             flash("No hay suficientes cartones disponibles en este momento.", "warning")
             return redirect(url_for("imprimir_cartones"))
-
-        if len(cartones_seleccionados) < cantidad:
-            flash(f"Solo se pudieron asignar {len(cartones_seleccionados)} cartones.", "warning")
 
         # Calcular precios en el backend
         precio_bs = float(get_precio())
         precio_usd = float(get_dolar())
         modalidad = get_modalidad()
-        
+
         total_price = calcular_precio_total(len(cartones_seleccionados), precio_bs, modalidad)
         total_price_2 = calcular_precio_total(len(cartones_seleccionados), precio_usd, modalidad)
 
@@ -252,7 +249,7 @@ def pago2():
             cantidad = 1
 
         cartones_seleccionados = asignar_cartones_aleatorios2(cantidad, user_session_id)
-        
+
         if not cartones_seleccionados:
             flash("No hay suficientes cartones disponibles en este momento.", "warning")
             return redirect(url_for("imprimir_cartones2"))
@@ -264,7 +261,7 @@ def pago2():
         precio_bs = float(get_precio2())
         precio_usd = float(get_dolar2())
         modalidad = get_modalidad2()
-        
+
         total_price = calcular_precio_total(len(cartones_seleccionados), precio_bs, modalidad)
         total_price_2 = calcular_precio_total(len(cartones_seleccionados), precio_usd, modalidad)
 
@@ -374,7 +371,7 @@ def admin_dashboard_partida():
         tipo_carton = request.form.get("tipoCarton")
         precio_dolares = request.form.get("precioCarton$")
         zelle = request.form.get("zelle")
-        
+
         # Procesar subida de imagen
         imagen_file = request.files.get("imagen")
         imagen_filename = None
@@ -404,7 +401,7 @@ def admin_dashboard_partida():
         current_limit = get_limite_cartones()
         if total_cartones is not None and total_cartones != current_limit:
             actualizar_partida(fecha_enunciado, recompensa, precio_carton, tipo_carton, action, precio_dolares, zelle, imagen_filename, total_cartones)
-            
+
             # Reiniciar base de datos
             conn = sqlite3.connect('bingo.db')
             cursor = conn.cursor()
@@ -424,7 +421,6 @@ def admin_dashboard_partida():
                     file_path = os.path.join(folder_path, filename)
                     if os.path.isfile(file_path):
                         os.remove(file_path)
-            flash(f"Límite de cartones actualizado a {total_cartones} y base de datos reiniciada.", "success")
         else:
             actualizar_partida(fecha_enunciado, recompensa, precio_carton, tipo_carton, action, precio_dolares, zelle, imagen_filename)
 
@@ -652,7 +648,7 @@ def admin_dashboard_partida2():
         tipo_carton = request.form.get("tipoCarton")
         precio_dolares = request.form.get("precioCarton$")
         zelle = request.form.get("zelle")
-        
+
         # Procesar subida de imagen
         imagen_file = request.files.get("imagen")
         imagen_filename = None

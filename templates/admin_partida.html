@@ -93,7 +93,6 @@
             <p><strong>Precio bolivares:</strong> {{ datos[3] }}bs</p>
             <p><strong>Precio zelle:</strong> {{ datos[4] }}$</p>
             <p><strong>Correo zelle:</strong> {{ datos[5] }}</p>
-            <p><strong>Descuento:</strong> {{ datos[6] }}</p>
             {% if datos|length > 7 and datos[7] %}
             <p><strong>Imagen actual:</strong> <a href="/static/img/{{ datos[7] }}" target="_blank">{{ datos[7] }}</a></p>
             {% endif %}
@@ -107,12 +106,12 @@
             <form id="reiniciarForm" action="" method="POST">
                 <button type="submit" id="DELETE" class="btn btn-danger">Reiniciar disponibilidad</button>
             </form>
-            
+
             <script>
                 document.addEventListener("DOMContentLoaded", function () {
                     const reiniciarForm = document.getElementById("reiniciarForm");
                     const venta = "{{ venta }}"; // Pasamos la variable como string
-            
+
                     // Cambiar el action dinámicamente
                     if (venta === "dos") {
                         reiniciarForm.action = "/admin/dashboard/partida2/reiniciar";
@@ -171,14 +170,7 @@
             </div>
             {% endif %}
 
-            <label for="tipoCarton" class="form-label">Activar descuento:</label>
-            <div class="mb-3 w-100">
-                <select class="form-control" id="tipoCarton" name="tipoCarton">
-                    <option value="">Seleccione</option>
-                    <option value="Activado">Activado</option>
-                    <option value="Desactivado">Desactivado</option>
-                </select>
-            </div>
+
 
             <!-- Botón de envío del formulario -->
             <button type="submit" class="btn btn-success w-100">Enviar</button>

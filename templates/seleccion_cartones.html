@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="/static/img/logo.png" type="image/x-icon">
     <title>Comprar Cartones - SuperBingo 4K</title>
-    <!-- Google Fonts: Outfit -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
     <style>
@@ -17,6 +15,7 @@
             color: #f8f9fa;
             min-height: 100vh;
             display: flex;
+            flex-direction: column; /* <-- LÍNEA AGREGADA: Fuerza a que los elementos se apilen verticalmente */
             align-items: center;
             justify-content: center;
             padding: 20px;
@@ -49,7 +48,7 @@
 
         .logo-img {
             width: 130px;
-            margin-bottom: 25px;
+            margin-bottom: 25px; /* Esto le dará una separación perfecta con el cuadro de abajo */
             filter: drop-shadow(0 0 10px rgba(37, 117, 252, 0.3));
             transition: transform 0.3s ease;
         }
@@ -130,7 +129,7 @@
             outline: none;
         }
 
-        .progress-container {
+.progress-container {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 50px;
             height: 26px;
@@ -147,9 +146,6 @@
             height: 100%;
             width: 0%;
             transition: width 0.8s cubic-bezier(0.1, 0.8, 0.3, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
             border-radius: 50px;
         }
 
@@ -157,12 +153,15 @@
             position: absolute;
             width: 100%;
             left: 0;
+            top: 50%; /* <-- Centra el texto verticalmente */
+            transform: translateY(-50%); /* <-- Ajuste fino para el centro exacto */
             text-align: center;
             font-size: 0.85rem;
             font-weight: 800;
             color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); /* Sombra un poco más oscura para que resalte sobre el verde */
             pointer-events: none;
+            z-index: 5; /* <-- Asegura que el texto siempre se renderice por encima de la barra */
         }
 
         /* Botón de Comprar */
@@ -251,10 +250,11 @@
             {% endif %}
         {% endwith %}
     </div>
+    
+    <img src="/static/img/logo.png" class="logo-img" alt="SuperBingo Logo">
 
     <div class="premium-card">
-        <img src="/static/img/logo.png" class="logo-img" alt="SuperBingo Logo">
-        
+
         <div class="raffle-img-container">
             <img src="/static/img/{{ imagen if imagen else 'logo.png' }}" class="raffle-img" alt="Bingo Imagen">
         </div>
@@ -262,7 +262,7 @@
         <div class="info">
             <div class="enunciado-title">{{ enunciado }}</div>
             <div class="precio-badge">Cada cartón cuesta {{ precio }} BS</div>
-            
+
             <div class="progress-container">
                 <div class="progress-bar" id="progress-bar"></div>
                 <span id="progress-text">QUEDAN {{ porcentaje }}%</span>
@@ -274,20 +274,19 @@
                 <label for="cantidad" class="select-label">Ingresa la cantidad de cartones a comprar:</label>
                 <input type="number" class="form-control custom-select" id="cantidad" name="cantidad" min="1" max="{{ disponibilidad }}" value="1" required style="text-align: center; font-weight: bold;">
             </div>
-            
+
             <button class="buy" id="buy-button" type="button" onclick="buyTickets()">COMPRAR CARTONES <span style="font-size: larger;">🎫</span></button>
         </form>
 
-        <button class="verify" onclick="verifyTicket()">Verificar Cartón <span style="font-size: large;">🎫</span></button>
+        <button class="verify" onclick="verifyTicket()">Verificar Cartones <span style="font-size: large;">🎫</span></button>
     </div>
 
     <div class="whatsapp">
-        <a href="https://wa.me/+584167150697" target="_blank">
-            <img src="/static/img/ws.png" alt="WhatsApp">
+        <a href="https://wa.me/+584160000000" target="_blank">
+            <img src="/static/img/Whatsapp_icon-icons.com_66931.png" alt="WhatsApp">
         </a>
     </div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <script>
@@ -328,7 +327,7 @@
         // Variables obtenidas desde el backend
         const enunciado = "{{ enunciado }}".trim();
         const disponibilidad = {{ disponibilidad }};
-    
+
         // Si no hay bingo disponible o disponibilidad es 0, ocultar el botón y el selector
         if (enunciado === "No disponible" || enunciado === "No hay cartones disponibles" || disponibilidad === 0) {
             document.getElementById("buy-button").style.display = "none";
