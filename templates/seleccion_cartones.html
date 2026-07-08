@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="/static/img/logo.png" type="image/x-icon">
     <title>Comprar Cartones - SuperBingo 4K</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
     <style>
         body {
@@ -15,7 +17,8 @@
             color: #f8f9fa;
             min-height: 100vh;
             display: flex;
-            flex-direction: column; /* <-- LÍNEA AGREGADA: Fuerza a que los elementos se apilen verticalmente */
+            flex-direction: column;
+            /* <-- LÍNEA AGREGADA: Fuerza a que los elementos se apilen verticalmente */
             align-items: center;
             justify-content: center;
             padding: 20px;
@@ -48,7 +51,8 @@
 
         .logo-img {
             width: 130px;
-            margin-bottom: 25px; /* Esto le dará una separación perfecta con el cuadro de abajo */
+            margin-bottom: 25px;
+            /* Esto le dará una separación perfecta con el cuadro de abajo */
             filter: drop-shadow(0 0 10px rgba(37, 117, 252, 0.3));
             transition: transform 0.3s ease;
         }
@@ -129,7 +133,7 @@
             outline: none;
         }
 
-.progress-container {
+        .progress-container {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 50px;
             height: 26px;
@@ -153,15 +157,19 @@
             position: absolute;
             width: 100%;
             left: 0;
-            top: 50%; /* <-- Centra el texto verticalmente */
-            transform: translateY(-50%); /* <-- Ajuste fino para el centro exacto */
+            top: 50%;
+            /* <-- Centra el texto verticalmente */
+            transform: translateY(-50%);
+            /* <-- Ajuste fino para el centro exacto */
             text-align: center;
             font-size: 0.85rem;
             font-weight: 800;
             color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); /* Sombra un poco más oscura para que resalte sobre el verde */
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+            /* Sombra un poco más oscura para que resalte sobre el verde */
             pointer-events: none;
-            z-index: 5; /* <-- Asegura que el texto siempre se renderice por encima de la barra */
+            z-index: 5;
+            /* <-- Asegura que el texto siempre se renderice por encima de la barra */
         }
 
         /* Botón de Comprar */
@@ -207,6 +215,27 @@
             color: #ffffff;
         }
 
+        /* Botón de Top Compradores */
+        .top-btn {
+            background: rgba(255, 215, 0, 0.15);
+            color: #ffd700;
+            border: 2px solid rgba(255, 215, 0, 0.4);
+            padding: 12px 24px;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .top-btn:hover {
+            background: rgba(255, 215, 0, 0.3);
+            border-color: #ffd700;
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
         /* WhatsApp flotante */
         .whatsapp {
             position: fixed;
@@ -236,21 +265,23 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="flash-messages">
         {% with messages = get_flashed_messages(with_categories=True) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show"
+            role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
     </div>
-    
+
     <img src="/static/img/logo.png" class="logo-img" alt="SuperBingo Logo">
 
     <div class="premium-card">
@@ -272,22 +303,64 @@
         <form id="cartonesForm" method="POST">
             <div class="select-container">
                 <label for="cantidad" class="select-label">Ingresa la cantidad de cartones a comprar:</label>
-                <input type="number" class="form-control custom-select" id="cantidad" name="cantidad" min="1" max="{{ disponibilidad }}" value="1" required style="text-align: center; font-weight: bold;">
+                <input type="number" class="form-control custom-select" id="cantidad" name="cantidad" min="1"
+                    max="{{ disponibilidad }}" value="1" required style="text-align: center; font-weight: bold;">
             </div>
 
-            <button class="buy" id="buy-button" type="button" onclick="buyTickets()">COMPRAR CARTONES <span style="font-size: larger;">🎫</span></button>
+            <button class="buy" id="buy-button" type="button" onclick="buyTickets()">COMPRAR CARTONES <span
+                    style="font-size: larger;">🎫</span></button>
         </form>
 
-        <button class="verify" onclick="verifyTicket()">Verificar Cartones <span style="font-size: large;">🎫</span></button>
+        <button class="top-btn" data-bs-toggle="modal" data-bs-target="#topCompradoresModal">🏆 Ver Top
+            Compradores</button>
+        <button class="verify" onclick="verifyTicket()">Verificar Cartones <span
+                style="font-size: large;">🎫</span></button>
     </div>
 
     <div class="whatsapp">
-        <a href="https://wa.me/+584160000000" target="_blank">
+        <a href="https://wa.me/+584163013962" target="_blank">
             <img src="/static/img/Whatsapp_icon-icons.com_66931.png" alt="WhatsApp">
         </a>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Modal Top Compradores -->
+    <div class="modal fade" id="topCompradoresModal" tabindex="-1" aria-labelledby="topCompradoresModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content"
+                style="background-color: #121a2c; color: #f8f9fa; border: 1px solid rgba(77, 166, 255, 0.4); border-radius: 16px;">
+                <div class="modal-header" style="border-bottom: 1px solid rgba(77, 166, 255, 0.2);">
+                    <h5 class="modal-title" id="topCompradoresModalLabel" style="font-weight: 800; color: #4da6ff;">🏆
+                        Top 5 Compradores</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% if top5_compradores %}
+                    <ul class="list-group list-group-flush">
+                        {% for comprador in top5_compradores %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center"
+                            style="background-color: transparent; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <div>
+                                <strong style="color: #ffd700;">{{ loop.index }}.</strong> {{ comprador.nombre }}
+                            </div>
+                            <span class="badge"
+                                style="background: linear-gradient(45deg, #4da6ff, #9f5cfc); font-size: 0.9rem;">{{
+                                comprador.length }} cartones</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-center text-muted col-12 my-3">Aún no hay compradores.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
 
     <script>
         const venta = "{{ venta }}";
@@ -337,4 +410,5 @@
         }
     </script>
 </body>
+
 </html>

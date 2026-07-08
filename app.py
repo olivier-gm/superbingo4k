@@ -110,6 +110,10 @@ def imprimir_cartones():
     if estatus == "Venta finalizada":
         return redirect(url_for('index'))  # redirigir a un panel de administración
 
+    from crud import get_datatop
+    solicitudes = get_datatop()
+    top5_data = sorted(solicitudes, key=lambda x: x.get('length', 0), reverse=True)[:5]
+
     return render_template("seleccion_cartones.html",
                            enunciado=get_enunciado(),
                            porcentaje=get_porcentaje(True),
@@ -118,7 +122,8 @@ def imprimir_cartones():
                            precio_dolares=get_dolar(),
                            modalidad=get_modalidad(),
                            venta='uno',
-                           imagen=get_imagen())
+                           imagen=get_imagen(),
+                           top5_compradores=top5_data)
 
 
 @app.route("/compra", methods=["POST", "GET"])
@@ -224,6 +229,10 @@ def imprimir_cartones2():
     if estatus == "Venta finalizada":
         return redirect(url_for('index'))  # redirigir a un panel de administración
 
+    from crud2 import get_datatop2
+    solicitudes = get_datatop2()
+    top5_data = sorted(solicitudes, key=lambda x: x.get('length', 0), reverse=True)[:5]
+
     return render_template("seleccion_cartones.html",
                            enunciado=get_enunciado2(),
                            porcentaje=get_porcentaje2(True),
@@ -232,7 +241,8 @@ def imprimir_cartones2():
                            precio_dolares=get_dolar2(),
                            modalidad=get_modalidad2(),
                            venta='dos',
-                           imagen=get_imagen2())
+                           imagen=get_imagen2(),
+                           top5_compradores=top5_data)
 
 
 @app.route("/compra2", methods=["POST", "GET"])

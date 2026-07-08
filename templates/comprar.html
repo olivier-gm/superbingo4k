@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <link rel="shortcut icon" href="/static/img/logo.png" type="image/x-icon">
 
@@ -7,7 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compra</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
         body {
             background-color: #000000;
@@ -33,38 +35,56 @@
 
         /* Estilos para el botón */
         .submit-btn {
-            background-color: #007bff; /* Color de fondo normal (azul) */
-            border-color: #007bff; /* Borde del mismo color */
-            color: white; /* Color del texto blanco */
-            padding: 10px 10px; /* Tamaño adecuado del botón */
-            font-size: 10px; /* Tamaño del texto */
+            background-color: #007bff;
+            /* Color de fondo normal (azul) */
+            border-color: #007bff;
+            /* Borde del mismo color */
+            color: white;
+            /* Color del texto blanco */
+            padding: 10px 10px;
+            /* Tamaño adecuado del botón */
+            font-size: 10px;
+            /* Tamaño del texto */
             font-weight: bold;
-            border-radius: 8px; /* Bordes redondeados */
-            transition: all 0.6s ease-in-out; /* Transición suave para todos los cambios */
-            width: 60%; /* Asegura que el botón ocupe todo el ancho disponible */
-            text-align: center; /* Asegura que el texto esté centrado */
-            display: inline-block; /* Asegura que el botón se comporte como un bloque */
+            border-radius: 8px;
+            /* Bordes redondeados */
+            transition: all 0.6s ease-in-out;
+            /* Transición suave para todos los cambios */
+            width: 60%;
+            /* Asegura que el botón ocupe todo el ancho disponible */
+            text-align: center;
+            /* Asegura que el texto esté centrado */
+            display: inline-block;
+            /* Asegura que el botón se comporte como un bloque */
         }
 
         /* Efecto al pasar el cursor sobre el botón */
         .submit-btn:hover {
-            background-color: #0056b3; /* Color de fondo más oscuro */
-            border-color: #004085; /* Color de borde más oscuro */
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
-            cursor: pointer; /* Cambia el cursor a mano */
+            background-color: #0056b3;
+            /* Color de fondo más oscuro */
+            border-color: #004085;
+            /* Color de borde más oscuro */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            /* Sombra más pronunciada */
+            cursor: pointer;
+            /* Cambia el cursor a mano */
             transform: scale(1.05);
         }
 
         /* Efecto al hacer clic (presionado) */
         .submit-btn:active {
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Sombra más suave al hacer clic */
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            /* Sombra más suave al hacer clic */
         }
 
         /* Efecto al estar deshabilitado */
         .submit-btn:disabled {
-            background-color: #ccc; /* Color de fondo gris cuando está deshabilitado */
-            border-color: #ccc; /* Color de borde gris */
-            cursor: not-allowed; /* Cursor indicando que está deshabilitado */
+            background-color: #ccc;
+            /* Color de fondo gris cuando está deshabilitado */
+            border-color: #ccc;
+            /* Color de borde gris */
+            cursor: not-allowed;
+            /* Cursor indicando que está deshabilitado */
         }
 
         /* --- Caja de Información Mejorada --- */
@@ -152,26 +172,54 @@
             text-align: left;
         }
 
-        input {
+        input,
+        select {
             margin-bottom: 20px;
             width: 100%;
-            border-radius: 10px; /* Bordes más redondeados */
-            height: 40px; /* Mayor altura para un aspecto más elegante */
-            border: 2px solid #ddd; /* Borde sutil y suave */
-            background-color: #f9f9f9; /* Fondo suave */
-            font-size: 16px; /* Tamaño de fuente adecuado */
-            transition: all 0.3s ease-in-out; /* Transición suave para el enfoque */
+            border-radius: 12px !important;
+            height: 50px !important;
+            border: 2px solid rgba(77, 166, 255, 0.4) !important;
+            background-color: rgba(11, 17, 30, 0.8) !important;
+            color: #ffffff !important;
+            font-size: 16px !important;
+            transition: all 0.3s ease-in-out;
+            padding-left: 15px;
+            font-weight: 500;
         }
 
         /* Estilo para cuando el input está enfocado */
-        input:focus {
-            border-color: #28a745; /* Cambia el color del borde al enfocarse */
-            box-shadow: 0 0 8px rgba(40, 167, 69, 0.4); /* Efecto de sombra cuando está enfocado */
-            background-color: #fff; /* Cambia el fondo a blanco al enfocarse */
-            outline: none; /* Quita el borde predeterminado del navegador */
+        input:focus,
+        select:focus {
+            border-color: #4da6ff !important;
+            box-shadow: 0 0 12px rgba(77, 166, 255, 0.4) !important;
+            background-color: #121a2c !important;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
+
+        .whatsapp {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .whatsapp:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .whatsapp img {
+            width: 60px;
+            height: 60px;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
         }
     </style>
 </head>
+
 <body>
     <center>
         <img src="static/img/logo.png" style="width: 30%; margin-top: 1vh;margin-bottom: -1vh;" alt="">
@@ -179,65 +227,91 @@
         <div class="info-box">
             <p class="premio-title">{{ premio }}</p>
             <div class="precio-alert">Cada cartón cuesta {{ precio }} Bs</div>
-            <p class="cartones-info">Cantidad de cartones: <span style="color:#4da6ff;">{{ cartones_seleccionados.split(',') | length if cartones_seleccionados else 0 }}</span></p>
+            <p class="cartones-info">Cantidad de cartones: <span style="color:#4da6ff;">{{
+                    cartones_seleccionados.split(',') | length if cartones_seleccionados else 0 }}</span></p>
 
 
 
             <div class="info-section">
-                <h4><span style="font-size: 1.2rem;">📱</span> Pago Móvil</h4>
-                <div class="data-grid">
-                    <strong>Banco:</strong>
-                    <span></span>
+                <div class="d-flex justify-content-between align-items-center mb-2"
+                    style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">
+                    <h4 style="margin: 0; color: #4da6ff; gap: 8px;" class="d-flex align-items-center mb-0"><span
+                            style="font-size: 1.2rem;">📱</span> Pago Móvil</h4>
+                    <button class="btn btn-sm btn-outline-info" onclick="copiarPagoMovil()"
+                        style="border-radius: 8px; font-weight: 600; font-size: 0.8rem; border-color: rgba(77, 166, 255, 0.5);">📋
+                        Copiar</button>
+                </div>
+                <div class="data-grid mt-2">
+                    <strong style="color: #a5b4fc;">Banco:</strong>
+                    <span id="pm-banco" style="color: #fff; font-weight: 700;">0102 - Bco. Venezuela</span>
 
-                    <strong>Teléfono:</strong>
-                    <span></span>
+                    <strong style="color: #a5b4fc;">Teléfono:</strong>
+                    <span id="pm-tel" style="color: #fff; font-weight: 700;">04245863659</span>
 
-                    <strong>C.I:</strong>
-                    <span>V</span>
+                    <strong style="color: #a5b4fc;">C.I:</strong>
+                    <span id="pm-ci" style="color: #fff; font-weight: 700;">V7632229</span>
                 </div>
             </div>
         </div>
 
-        <h2 style="color: whitesmoke;">Total a pagar: {{ total_price }} Bs</h2>
+        <h2 style="color: #f8f9fa; font-weight: 800; font-size: 1.8rem; text-shadow: 0 2px 5px rgba(0,0,0,0.5);">Total a
+            pagar: <span style="color: #ff5252;">{{ total_price }} Bs</span></h2>
 
-        <h3 style="color: rgb(43, 158, 235); font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;">BINGO DEL DIA: {{ enunciado }}</h3>
+        <h3
+            style="color: #4da6ff; font-weight: 600; font-family: 'Outfit', sans-serif; letter-spacing: 0.5px; margin-bottom: 25px;">
+            BINGO DEL DIA: {{ enunciado }}</h3>
 
-        <form id="compraForm" action="" method="POST" enctype="multipart/form-data">
+        <form id="compraForm" action="" method="POST" enctype="multipart/form-data"
+            style="width: 100%; max-width: 450px;">
             <div class="mb-3">
-                <input type="text" class="form-control" style="width: 90%;" id="nombre" name="nombre" required placeholder="Nombre y Apellido">
+                <input type="text" class="form-control" id="nombre" name="nombre" required
+                    placeholder="Nombre y Apellido">
             </div>
 
             <div class="mb-3">
-                <input type="number" class="form-control" style="width: 90%;" id="cedula" name="cedula" required placeholder="Cédula de Identidad" min="0">
+                <input type="number" class="form-control" id="cedula" name="cedula" required
+                    placeholder="Cédula de Identidad" min="0">
             </div>
 
-            <div class="mb-3">
-                <select id="codigo_pais" class="form-select" style="width: 30%; margin-right: 60%;" required>
-                    <option value="+58" selected>🇻🇪 +58 (Venezuela)</option>
-                    <option value="+1">🇺🇸 +1 (Estados Unidos)</option>
-                    <option value="+57">🇨🇴 +57 (Colombia)</option>
-                    <option value="+51">🇵🇪 +51 (Perú)</option>
-                    <option value="+56">🇨🇱 +56 (Chile)</option>
-                    <option value="+593">🇪🇨 +593 (Ecuador)</option>
-                    <option value="+39">🇮🇹 +39 (Italia)</option>
-                    <option value="+52">🇲🇽 +52 (México)</option>
+            <div class="mb-3 d-flex" style="gap: 10px;">
+                <select id="codigo_pais" class="form-select" style="width: 35%; margin-bottom: 0;" required>
+                    <option value="+58" selected>🇻🇪 +58</option>
+                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+57">🇨🇴 +57</option>
+                    <option value="+51">🇵🇪 +51</option>
+                    <option value="+56">🇨🇱 +56</option>
+                    <option value="+593">🇪🇨 +593</option>
+                    <option value="+39">🇮🇹 +39</option>
+                    <option value="+52">🇲🇽 +52</option>
                 </select>
-                <input type="number" class="form-control" style="width: 90%;" id="telefono" placeholder="Número Telefónico" required>
+                <input type="number" class="form-control" style="width: 65%; margin-bottom: 0;" id="telefono"
+                    placeholder="Número Telefónico" required>
             </div>
 
             <input type="hidden" id="telefono_completo" name="telefono">
 
-            <label style="color: white;" for="referencia" class="form-label">Subir comprobante de pago</label>
-            <div class="mb-3">
-                <input type="file" class="form-control" style="width: 30%;" id="referencia" name="referencia" required accept=".png, .jpg, .jpeg">
+            <label
+                style="color: #a5b4fc; font-weight: 600; font-size: 0.95rem; display: block; text-align: left; margin-top: 15px; margin-bottom: 8px;"
+                for="referencia">Subir comprobante de pago</label>
+            <div class="mb-4">
+                <input type="file" class="form-control" id="referencia" name="referencia" required
+                    accept=".png, .jpg, .jpeg" style="padding-top: 10px;">
             </div>
 
             <input type="hidden" name="cartones_seleccionados" value="{{ cartones_seleccionados }}">
             <input type="hidden" name="total_price" value="{{ total_price }}">
             <input type="hidden" name="total_price_2" value="{{ total_price2 }}">
 
-            <button type="submit" style="font-size: large;" class="btn submit-btn">Confirmar compra</button>
+            <button type="submit" class="btn submit-btn"
+                style="background: linear-gradient(90deg, #2575fc 0%, #6a11cb 100%); font-size: 1.1rem; border-radius: 14px; padding: 14px 28px; width: 100%; border: none;">CONFIRMAR
+                COMPRA</button>
         </form>
+
+        <div class="whatsapp">
+            <a href="https://wa.me/+584163013962" target="_blank">
+                <img src="/static/img/Whatsapp_icon-icons.com_66931.png" alt="WhatsApp">
+            </a>
+        </div>
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {
@@ -252,11 +326,20 @@
                 }
 
                 // Listener para el evento submit del formulario
-                compraForm.addEventListener("submit", function() {
+                compraForm.addEventListener("submit", function () {
                     // Asegura que el teléfono completo se actualice antes de enviar
                     actualizarTelefonoCompleto();
                 });
             });
+
+            function copiarPagoMovil() {
+                const pagoData = `Banco: 0102\nTeléfono: 04245863659\nC.I: V7632229`;
+                navigator.clipboard.writeText(pagoData).then(() => {
+                    alert("¡Datos de Pago Móvil copiados al portapapeles!");
+                }).catch(err => {
+                    alert("Error al copiar los datos.");
+                });
+            }
         </script>
 
         <script>
@@ -264,7 +347,7 @@
             const tiempoExpiracion = 25 * 60 * 1000;
 
             // Inicia un temporizador
-            setTimeout(function() {
+            setTimeout(function () {
                 const venta = "{{ venta }}"; // Aseguramos que se pase como string
 
                 if (venta === "dos") {
@@ -276,8 +359,12 @@
         </script>
     </center>
 
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz4fnFO9gybP5akQ6gMv5BXkL0M6tn7fFksz9Hg9xW1WkT7WqO8lq3t7E2f" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-pzjw8f+ua7Kw1TIq0s1FhQya5m7ZGkC9Ydu2LJlfUqtJfeXusKhD2g5QbQ5h0Bz6Y" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+        integrity="sha384-oBqDVmMz4fnFO9gybP5akQ6gMv5BXkL0M6tn7fFksz9Hg9xW1WkT7WqO8lq3t7E2f"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"
+        integrity="sha384-pzjw8f+ua7Kw1TIq0s1FhQya5m7ZGkC9Ydu2LJlfUqtJfeXusKhD2g5QbQ5h0Bz6Y"
+        crossorigin="anonymous"></script>
     <script>
         document.getElementById("telefono").addEventListener("input", function () {
             actualizarTelefonoCompleto();
@@ -295,4 +382,5 @@
         }
     </script>
 </body>
+
 </html>
