@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compradores</title>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
         .btn-delete {
             background-color: #4CAF50;
@@ -50,11 +52,12 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container my-4">
         <h2 class="text-center mb-4">Compradores</h2>
 
-               <form action="/admin/dashboard/solicitudes/top" method="GET">
+        <form action="/admin/dashboard/solicitudes/top" method="GET">
             <button type="submit">Ver top 5 </button>
         </form>
 
@@ -83,145 +86,147 @@
                         <td class="clickable-cell">{{ solicitud.telefono }}</td>
                         <td class="clickable-cell">
                             {% if solicitud.referencia %}
-                                <!-- Botón para mostrar la imagen -->
-                                <button class="btn btn-info btn-sm" onclick="mostrarImagen('{{ solicitud.referencia }}')">
-                                    Ver Comprobante
-                                </button>
+                            <!-- Botón para mostrar la imagen -->
+                            <button class="btn btn-info btn-sm" onclick="mostrarImagen('{{ solicitud.referencia }}')">
+                                Ver Comprobante
+                            </button>
                             {% else %}
-                                No hay comprobante
+                            No hay comprobante
                             {% endif %}
                         </td>
                         <td class="clickable-cell">{{ solicitud.cartones }}</td>
                         <td class="clickable-cell">{{ solicitud.monto }}</td>
                         <td class="clickable-cell">{{ solicitud.fecha }}</td>
                         <td>
-                            <button
-                            id="btn-{{ solicitud.id }}"
-                            class="btn btn-delete"
-                            data-telefono="{{ solicitud.telefono }}"
-                            data-id="{{ solicitud.id }}"
-                            data-link="{{ solicitud.link }}"
-                            onclick="enviarMensaje(this)">
-                            {% if solicitud.estatus == 'enviado' %}
+                            <button id="btn-{{ solicitud.id }}" class="btn btn-delete"
+                                data-telefono="{{ solicitud.telefono }}" data-id="{{ solicitud.id }}"
+                                data-link="{{ solicitud.link }}" onclick="enviarMensaje(this)">
+                                {% if solicitud.estatus == 'enviado' %}
                                 Volver a enviar link
-                            {% else %}
+                                {% else %}
                                 Enviar link
-                            {% endif %}
-                        </button>
-                            <!-- Botón de Copiar Link -->
-                            <button
-                                class="btn-copy"
-                                data-link="{{ solicitud.link }}"
-                                onclick="copiarLink(this)">
-                                Copiar link
+                                {% endif %}
                             </button>
-                                <!-- Botón de Invalidar Usuario -->
-                        <button
-                        class="btn btn-danger btn-sm"
-                        data-id="{{ solicitud.id }}"
-                        data-cartones="{{ solicitud.cartones }}"
-                        onclick="invalidarUsuario(this)">
-                        Invalidar Usuario
-                    </button>
+                            <!-- Botón de Aprobar Compra -->
+                            <button class="btn btn-success btn-sm btn-aprobar" data-id="{{ solicitud.id }}"
+                                onclick="aprobarCompra(this)" {% if solicitud.estatus=='aprobado' %}disabled{% endif %}>
+                                {% if solicitud.estatus == 'aprobado' %}Aprobado{% else %}Aprobar compra{% endif %}
+                            </button>
+                            <!-- Botón de Invalidar Usuario -->
+                            <button class="btn btn-danger btn-sm" data-id="{{ solicitud.id }}"
+                                data-cartones="{{ solicitud.cartones }}" onclick="invalidarUsuario(this)">
+                                Invalidar Usuario
+                            </button>
                         </td>
                     </tr>
                     <script>
 
-function invalidarUsuario(button) {
-    // Obtener los valores de los atributos del botón
-    const id = button.getAttribute("data-id");
-    const cartones = button.getAttribute("data-cartones");
+                        function invalidarUsuario(button) {
+                            // Obtener los valores de los atributos del botón
+                            const id = button.getAttribute("data-id");
+                            const cartones = button.getAttribute("data-cartones");
 
-    // Confirmación antes de proceder
-    if (!confirm("¿Estás seguro de que deseas invalidar este usuario y reintegrar los cartones?")) {
-        return;
-    }
-
-    const currentPath = window.location.pathname;
-    const newSegment = '/invalidate/';
-    const fullPath = currentPath + newSegment;
-    // Llamar al servidor para invalidar al usuario y reintegrar los cartones
-    fetch(fullPath, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id: id, cartones: cartones }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert("Usuario invalidado y cartones reintegrados.");
-            location.reload();
-            // Opcional: Actualizar la tabla o eliminar la fila
-        } else {
-            alert("Error al invalidar el usuario.");
-        }
-    })
-    .catch(error => console.error("Error:", error));
-}
-
-
-                    function enviarMensaje(button) {
-                        // Obtener el teléfono y el id de los atributos del botón
-                        const telefono = button.getAttribute("data-telefono");
-                        const id = button.getAttribute("data-id");
-
-                        // Cambiar el texto del botón para mostrar que el link se enviará
-                        button.textContent = "Volver a enviar link";
-
-                        // Obtener el link de la solicitud desde el atributo data-link
-                        let link = button.getAttribute("data-link");
-                        link = link.replace(/\s+/g, "");  // Eliminar todos los espacios
-
-
-                        // Construir el mensaje
-                        const mensaje = `Bienvenido a superbingo4k!\nAquí está el link de descarga para tus cartones: www.superbingo4k.club${link}`;
-
-                        // Crear el URL para abrir WhatsApp con el mensaje
-                        const whatsappURL = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
-
-                        // Abrir WhatsApp con el mensaje predefinido
-                        window.open(whatsappURL, "_blank");
-
-                        const currentPath = window.location.pathname;
-                        const newSegment = '/message/';
-                        const fullPath = currentPath + newSegment;
-                        // Llamar al servidor para invalidar al usuario y reintegrar los cartones
-                        fetch(fullPath, {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({ id: id }),
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                button.textContent = "Volver a enviar link";
-                            } else {
-                                alert("Error al actualizar el estado");
+                            // Confirmación antes de proceder
+                            if (!confirm("¿Estás seguro de que deseas invalidar este usuario y reintegrar los cartones?")) {
+                                return;
                             }
-                        })
-                        .catch(error => console.error("Error:", error));
-                    }
+
+                            const currentPath = window.location.pathname;
+                            const newSegment = '/invalidate/';
+                            const fullPath = currentPath + newSegment;
+                            // Llamar al servidor para invalidar al usuario y reintegrar los cartones
+                            fetch(fullPath, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({ id: id, cartones: cartones }),
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        alert("Usuario invalidado y cartones reintegrados.");
+                                        location.reload();
+                                        // Opcional: Actualizar la tabla o eliminar la fila
+                                    } else {
+                                        alert("Error al invalidar el usuario.");
+                                    }
+                                })
+                                .catch(error => console.error("Error:", error));
+                        }
 
 
-                        function copiarLink(button) {
-                            let link = button.getAttribute("data-link");  // Obtener el link de la base de datos
+                        function enviarMensaje(button) {
+                            // Obtener el teléfono y el id de los atributos del botón
+                            const telefono = button.getAttribute("data-telefono");
+                            const id = button.getAttribute("data-id");
+
+                            // Cambiar el texto del botón para mostrar que el link se enviará
+                            button.textContent = "Volver a enviar link";
+
+                            // Obtener el link de la solicitud desde el atributo data-link
+                            let link = button.getAttribute("data-link");
                             link = link.replace(/\s+/g, "");  // Eliminar todos los espacios
 
 
+                            // Construir el mensaje
+                            const mensaje = `Bienvenido a superbingo4k!\nAquí está el link de descarga para tus cartones: www.superbingo4k.club${link}`;
 
-                            // Crea un campo de texto temporal para copiar el link
-                            const tempInput = document.createElement("input");
-                            tempInput.value = `www.superbingo4k.club${link}`;
-                            document.body.appendChild(tempInput);
-                            tempInput.select();
-                            document.execCommand("copy");
-                            document.body.removeChild(tempInput);
+                            // Crear el URL para abrir WhatsApp con el mensaje
+                            const whatsappURL = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
 
-                            alert("Link copiado al portapapeles: " + `www.superbingo4k.club${link}`);
+                            // Abrir WhatsApp con el mensaje predefinido
+                            window.open(whatsappURL, "_blank");
+
+                            const currentPath = window.location.pathname;
+                            const newSegment = '/message/';
+                            const fullPath = currentPath + newSegment;
+                            // Llamar al servidor para invalidar al usuario y reintegrar los cartones
+                            fetch(fullPath, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({ id: id }),
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        button.textContent = "Volver a enviar link";
+                                    } else {
+                                        alert("Error al actualizar el estado");
+                                    }
+                                })
+                                .catch(error => console.error("Error:", error));
+                        }
+
+
+                        function aprobarCompra(button) {
+                            const id = button.getAttribute("data-id");
+
+                            if (!confirm("¿Aprobar esta compra? Solo las compras aprobadas aparecerán en el Top.")) return;
+
+                            const currentPath = window.location.pathname;
+                            const newSegment = '/approve/';
+                            const fullPath = currentPath + newSegment;
+
+                            fetch(fullPath, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ id: id }),
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        button.textContent = "Aprobado";
+                                        button.disabled = true;
+                                        button.classList.remove("btn-success");
+                                        button.classList.add("btn-secondary");
+                                    } else {
+                                        alert("Error al aprobar: " + data.message);
+                                    }
+                                })
+                                .catch(error => console.error("Error:", error));
                         }
                     </script>
                     {% endfor %}
@@ -231,7 +236,9 @@ function invalidarUsuario(button) {
     </div>
 
     <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-jBq8dLDry3nJ8tyDk5bxUQwF1XZUjZlZFS8SSek0bpKPIqjPY/z2QkI9rxfnzTMq" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-jBq8dLDry3nJ8tyDk5bxUQwF1XZUjZlZFS8SSek0bpKPIqjPY/z2QkI9rxfnzTMq"
+        crossorigin="anonymous"></script>
 
     <script>
         function mostrarImagen(ruta) {
@@ -259,7 +266,7 @@ function invalidarUsuario(button) {
             document.body.appendChild(modal);
 
             // Cerrar el modal cuando se haga clic en él
-            modal.onclick = function() {
+            modal.onclick = function () {
                 document.body.removeChild(modal);
             };
         }
@@ -269,4 +276,5 @@ function invalidarUsuario(button) {
 
 
 </body>
+
 </html>

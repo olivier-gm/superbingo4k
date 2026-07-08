@@ -511,6 +511,29 @@ def top():
     return render_template("top.html", solicitudes = solicitudes)
 
 
+@app.route("/admin/dashboard/solicitudes/approve/", methods=["POST"])
+def approve():
+    data = request.get_json()
+    solicitud_id = data.get("id")
+
+    conn = sqlite3.connect('bingo.db')
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE requeridos
+            SET estatus = "aprobado"
+            WHERE id = ?;
+        """, (solicitud_id,))
+
+        conn.commit()
+        return jsonify({"success": True})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "error": str(e)})
+    finally:
+        conn.close()
+
 @app.route("/admin/dashboard/solicitudes/invalidate/", methods=["POST"])
 def invalidate():
     data = request.get_json()
@@ -712,11 +735,35 @@ def admin_dashboard_solicitudes2():
     solicitudes = get_data2()  # Recupera los datos de la tabla
     return render_template("admin_solicitudes.html", solicitudes=solicitudes)
 
-@app.route("/admin/dashboard/solicitudes/top")
+@app.route("/admin/dashboard/solicitudes2/top")
 @login_required  # Ruta protegida por login
 def top2():
     solicitudes = get_datatop2()
     return render_template("top.html", solicitudes = solicitudes)
+
+@app.route("/admin/dashboard/solicitudes2/approve/", methods=["POST"])
+def approve2():
+    data = request.get_json()
+    solicitud_id = data.get("id")
+
+    # Conectar a la base de datos
+    conn = sqlite3.connect('bingo2.db')
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE requeridos
+            SET estatus = "aprobado"
+            WHERE id = ?;
+        """, (solicitud_id,))
+
+        conn.commit()
+        return jsonify({"success": True})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "error": str(e)})
+    finally:
+        conn.close()
 
 @app.route("/admin/dashboard/solicitudes2/invalidate/", methods=["POST"])
 def invalidate2():

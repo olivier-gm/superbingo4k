@@ -366,8 +366,8 @@ def get_datatop():
             link,
             SUM(
                 (SELECT LENGTH(REPLACE(REPLACE(cartones_solicitados, '[', ''), ']', '')) - LENGTH(REPLACE(REPLACE(cartones_solicitados, ',', ''), '[', '')) + 2)
-            ) AS length                                  -- Sumamos el campo length
         FROM requeridos
+        WHERE estatus = 'aprobado'
         GROUP BY cedula                                 -- Agrupamos por cedula
     """)
 
