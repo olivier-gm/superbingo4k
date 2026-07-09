@@ -113,7 +113,8 @@ def normalizar_precio(valor_formulario, valor_actual=None):
         if valor is None:
             return ""
         valor_limpio = str(valor).strip()
-        valor_limpio = re.sub(r'(?i)\s*bs\b', '', valor_limpio)
+        if valor_limpio.lower().endswith('bs'):
+            valor_limpio = valor_limpio[:-2].strip()
         valor_limpio = valor_limpio.replace('$', '').strip()
         return valor_limpio
 
