@@ -22,7 +22,7 @@ def obtener_datos_partida2():
     cursor = conn.cursor()
 
     # Crear la consulta para obtener el dato específico (incluyendo imagen)
-    cursor.execute("SELECT estatus, partida, recompensa, precio_de_carton, precio_dolar, zelle, modalidad_carton_regalo, imagen FROM partida WHERE id = 1")
+    cursor.execute("SELECT estatus, partida, recompensa, precio_de_carton, precio_dolar, zelle, modalidad_carton_regalo, imagen, min_cartones FROM partida WHERE id = 1")
     resultado = cursor.fetchone()
     conn.commit()
 
@@ -45,7 +45,7 @@ def obtener_datos_partida2():
 
 
 
-def actualizar_partida2(fecha_enunciado=None, recompensa=None, precio_carton=None, tipo_carton=None, action=None, precio_dolares=None, zelle=None, imagen=None):
+def actualizar_partida2(fecha_enunciado=None, recompensa=None, precio_carton=None, tipo_carton=None, action=None, precio_dolares=None, zelle=None, imagen=None, min_cartones=None):
     import sqlite3
 
     # Conectar a la base de datos
@@ -59,9 +59,9 @@ def actualizar_partida2(fecha_enunciado=None, recompensa=None, precio_carton=Non
     if count == 0:
         # Insertar una fila inicial con valores por defecto si no hay registros
         cursor.execute("""
-            INSERT INTO partida (partida, recompensa, precio_de_carton, modalidad_carton_regalo, estatus, imagen)
-            VALUES (?, ?, ?, ?, ?, ?);
-        """, ("", "", 0.0, "", "Venta finalizada", "logo.png"))
+            INSERT INTO partida (partida, recompensa, precio_de_carton, modalidad_carton_regalo, estatus, imagen, min_cartones)
+            VALUES (?, ?, ?, ?, ?, ?, ?);
+        """, ("", "", 0.0, "", "Venta finalizada", "logo.png", 1))
         conn.commit()
 
     # Construcción dinámica de los campos y valores para el comando UPDATE
@@ -99,6 +99,10 @@ def actualizar_partida2(fecha_enunciado=None, recompensa=None, precio_carton=Non
     if imagen:
         fields.append("imagen = ?")
         values.append(imagen)
+
+    if min_cartones is not None:
+        fields.append("min_cartones = ?")
+        values.append(min_cartones)
 
     # Actualizar la fila solo si hay campos a modificar
     if fields:
@@ -529,6 +533,14 @@ def get_imagen2():
     res = cursor.fetchone()
     conn.close()
     return res[0] if res and res[0] else "logo.png"
+
+def get_minimo_cartones2():
+    conn = sqlite3.connect('bingo2.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT min_cartones FROM partida WHERE id = 1")
+    res = cursor.fetchone()
+    conn.close()
+    return res[0] if res and res[0] else 1
 
 def asignar_cartones_aleatorios2(cantidad, session_id):
     conn = sqlite3.connect('bingo2.db')

@@ -99,6 +99,11 @@
             {% if venta == 'uno' and datos|length > 8 and datos[8] %}
             <p><strong>Límite de cartones:</strong> {{ datos[8] }}</p>
             {% endif %}
+            {% if venta == 'uno' and datos|length > 9 and datos[9] %}
+            <p><strong>Mínimo de cartones a comprar:</strong> {{ datos[9] }}</p>
+            {% elif venta == 'dos' and datos|length > 8 and datos[8] %}
+            <p><strong>Mínimo de cartones a comprar:</strong> {{ datos[8] }}</p>
+            {% endif %}
         </div>
 
         <!-- Formulario -->
@@ -169,6 +174,13 @@
                 <small class="form-text text-muted" style="color: red !important; display: block; margin-top: 5px;">* Al cambiar este valor se reiniciará la base de datos y la disponibilidad.</small>
             </div>
             {% endif %}
+
+            <div class="mb-3 w-100">
+                <label for="minimoCartones" class="form-label" style="font-weight: bold;">Mínimo de cartones a comprar:</label>
+                <input type="number" class="form-control" id="minimoCartones" name="minimoCartones" min="1"
+                    max="{{ datos[8] if venta == 'uno' and datos|length > 8 and datos[8] else 5000 }}"
+                    value="{% if venta == 'uno' %}{{ datos[9] if datos|length > 9 and datos[9] else 1 }}{% else %}{{ datos[8] if datos|length > 8 and datos[8] else 1 }}{% endif %}">
+            </div>
 
 
 
