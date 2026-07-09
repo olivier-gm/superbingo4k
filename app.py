@@ -108,6 +108,36 @@ def calcular_precio_total(cantidad, precio_unitario, modalidad):
         cantidad_a_pagar = cantidad
     return cantidad_a_pagar * precio_unitario
 
+def normalizar_precio(valor_formulario, valor_actual=None):
+    def limpiar(valor):
+        if valor is None:
+            return ""
+        valor_limpio = str(valor).strip()
+        if valor_limpio.lower().endswith('bs'):
+            valor_limpio = valor_limpio[:-2].strip()
+        valor_limpio = valor_limpio.replace('$', '').strip()
+        return valor_limpio
+
+    valor = limpiar(valor_formulario)
+    if not valor:
+        valor = limpiar(valor_actual)
+
+    if not valor:
+        return None
+
+    try:
+        float(valor)
+        return valor
+    except ValueError:
+        valor_actual_limpio = limpiar(valor_actual)
+        if valor_actual_limpio:
+            try:
+                float(valor_actual_limpio)
+                return valor_actual_limpio
+            except ValueError:
+                return None
+        return None
+
 @app.route("/cartones", methods=["GET"])
 def imprimir_cartones():
     estatus = get_estatus()
@@ -417,9 +447,9 @@ def admin_dashboard_partida():
         action = request.form.get("action")  # "reiniciar" o "detener"
         fecha_enunciado = request.form.get("fechaEnunciado")
         recompensa = request.form.get("recompensa")
-        precio_carton = request.form.get("precioCarton")
+        precio_carton = normalizar_precio(request.form.get("precioCarton"), datos[3] if len(datos) > 3 else None)
         tipo_carton = request.form.get("tipoCarton")
-        precio_dolares = request.form.get("precioCarton$")
+        precio_dolares = normalizar_precio(request.form.get("precioCarton$"), datos[4] if len(datos) > 4 else None)
         zelle = request.form.get("zelle")
 
         # Procesar subida de imagen
@@ -730,9 +760,9 @@ def admin_dashboard_partida2():
         action = request.form.get("action")  # "reiniciar" o "detener"
         fecha_enunciado = request.form.get("fechaEnunciado")
         recompensa = request.form.get("recompensa")
-        precio_carton = request.form.get("precioCarton")
+        precio_carton = normalizar_precio(request.form.get("precioCarton"), datos[3] if len(datos) > 3 else None)
         tipo_carton = request.form.get("tipoCarton")
-        precio_dolares = request.form.get("precioCarton$")
+        precio_dolares = normalizar_precio(request.form.get("precioCarton$"), datos[4] if len(datos) > 4 else None)
         zelle = request.form.get("zelle")
         minimo_cartones_val = request.form.get("minimoCartones")
         minimo_cartones = None
