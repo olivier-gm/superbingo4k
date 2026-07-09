@@ -303,8 +303,13 @@
         <form id="cartonesForm" method="POST">
             <div class="select-container">
                 <label for="cantidad" class="select-label">Ingresa la cantidad de cartones a comprar:</label>
-                <input type="number" class="form-control custom-select" id="cantidad" name="cantidad" min="1"
-                    max="{{ disponibilidad }}" value="1" required style="text-align: center; font-weight: bold;">
+                <div class="input-group" id="cantidad-group">
+                    <button class="btn btn-outline-light" type="button" onclick="adjustQuantity(-1)">-</button>
+                    <input type="number" class="form-control custom-select" id="cantidad" name="cantidad"
+                        min="{{ minimo_selector }}" max="{{ disponibilidad }}" value="{{ minimo_selector }}" required
+                        style="text-align: center; font-weight: bold;">
+                    <button class="btn btn-outline-light" type="button" onclick="adjustQuantity(1)">+</button>
+                </div>
             </div>
 
             <button class="buy" id="buy-button" type="button" onclick="buyTickets()">COMPRAR CARTONES <span
@@ -379,6 +384,15 @@
             window.location.href = '/verify';
         }
 
+        function adjustQuantity(delta) {
+            const input = document.getElementById("cantidad");
+            const min = parseInt(input.min || "1", 10);
+            const max = parseInt(input.max || "1", 10);
+            const current = parseInt(input.value || min, 10);
+            const next = Math.min(max, Math.max(min, current + delta));
+            input.value = next;
+        }
+
         function updateProgressBar(porcentaje) {
             const progressBar = document.getElementById('progress-bar');
             const porcentajeNumerico = parseFloat(porcentaje);
@@ -404,9 +418,21 @@
         // Si no hay bingo disponible o disponibilidad es 0, ocultar el botón y el selector
         if (enunciado === "No disponible" || enunciado === "No hay cartones disponibles" || disponibilidad === 0) {
             document.getElementById("buy-button").style.display = "none";
-            document.getElementById("cantidad").style.display = "none";
+            document.getElementById("cantidad-group").style.display = "none";
             const label = document.querySelector(".select-label");
             if (label) label.textContent = "No hay cartones disponibles para esta venta.";
+        } else {
+            const cantidadInput = document.getElementById("cantidad");
+            const min = parseInt(cantidadInput.min || "1", 10);
+            const max = parseInt(cantidadInput.max || "1", 10);
+            if (parseInt(cantidadInput.value || "0", 10) < min) {
+                cantidadInput.value = min;
+            }
+            cantidadInput.addEventListener("input", () => {
+                const value = parseInt(cantidadInput.value || "0", 10);
+                if (!isNaN(value) && value < min) cantidadInput.value = min;
+                if (!isNaN(value) && value > max) cantidadInput.value = max;
+            });
         }
     </script>
 </body>

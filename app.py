@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
-from crud import get_datatop, obtener_comprador_por_cedula, get_porcentaje, cartones_disponibles,cartones_usados,reintegrar_cartones,get_data,actualizar_partida,obtener_datos_partida, get_enunciado, get_premio, insertar_comprador, get_estatus, get_precio, vendidos, get_modalidad, get_dolar, get_zelle, get_imagen, asignar_cartones_aleatorios, get_limite_cartones
-from crud2 import get_datatop2, get_porcentaje2, cartones_disponibles2,cartones_usados2,reintegrar_cartones2,get_data2,actualizar_partida2,obtener_datos_partida2, get_enunciado2, get_premio2, insertar_comprador2, get_estatus2, get_precio2, vendidos2, get_modalidad2, get_dolar2, get_zelle2, get_imagen2, asignar_cartones_aleatorios2
+from crud import get_datatop, obtener_comprador_por_cedula, get_porcentaje, cartones_disponibles,cartones_usados,reintegrar_cartones,get_data,actualizar_partida,obtener_datos_partida, get_enunciado, get_premio, insertar_comprador, get_estatus, get_precio, vendidos, get_modalidad, get_dolar, get_zelle, get_imagen, asignar_cartones_aleatorios, get_limite_cartones, get_minimo_cartones
+from crud2 import get_datatop2, get_porcentaje2, cartones_disponibles2,cartones_usados2,reintegrar_cartones2,get_data2,actualizar_partida2,obtener_datos_partida2, get_enunciado2, get_premio2, insertar_comprador2, get_estatus2, get_precio2, vendidos2, get_modalidad2, get_dolar2, get_zelle2, get_imagen2, asignar_cartones_aleatorios2, get_minimo_cartones2
 import os
 from werkzeug.utils import secure_filename
 from functools import wraps
@@ -73,6 +73,10 @@ def check_and_upgrade_db():
                 if 'total_cartones' not in columns_partida:
                     cursor.execute("ALTER TABLE partida ADD COLUMN total_cartones INTEGER DEFAULT 200")
                     conn.commit()
+
+                if 'min_cartones' not in columns_partida:
+                    cursor.execute("ALTER TABLE partida ADD COLUMN min_cartones INTEGER DEFAULT 1")
+                    conn.commit()
         except Exception as e:
             print(f"Error checking/upgrading db {db_name}: {e}")
 
@@ -114,10 +118,16 @@ def imprimir_cartones():
     solicitudes = get_datatop()
     top5_data = sorted(solicitudes, key=lambda x: x.get('length', 0), reverse=True)[:5]
 
+    disponibilidad = get_porcentaje(False)
+    minimo_cartones = get_minimo_cartones()
+    minimo_selector = minimo_cartones if disponibilidad >= minimo_cartones else 1
+
     return render_template("seleccion_cartones.html",
                            enunciado=get_enunciado(),
                            porcentaje=get_porcentaje(True),
-                           disponibilidad=get_porcentaje(False),
+                           disponibilidad=disponibilidad,
+                           minimo_cartones=minimo_cartones,
+                           minimo_selector=minimo_selector,
                            precio=int(get_precio()),
                            precio_dolares=get_dolar(),
                            modalidad=get_modalidad(),
@@ -134,10 +144,22 @@ def pago():
             session['session_id'] = str(uuid.uuid4())
         user_session_id = session['session_id']
 
+        disponibilidad = get_porcentaje(False)
+        minimo_cartones = get_minimo_cartones()
+        minimo_permitido = minimo_cartones if disponibilidad >= minimo_cartones else 1
+
         try:
-            cantidad = int(request.form.get("cantidad", 1))
+            cantidad = int(request.form.get("cantidad", minimo_permitido))
         except ValueError:
-            cantidad = 1
+            cantidad = minimo_permitido
+
+        if cantidad < minimo_permitido:
+            flash(f"Debes comprar al menos {minimo_permitido} cartones.", "warning")
+            return redirect(url_for("imprimir_cartones"))
+
+        if cantidad > disponibilidad:
+            flash("No hay suficientes cartones disponibles en este momento.", "warning")
+            return redirect(url_for("imprimir_cartones"))
 
         cartones_seleccionados = asignar_cartones_aleatorios(cantidad, user_session_id)
 
@@ -233,10 +255,16 @@ def imprimir_cartones2():
     solicitudes = get_datatop2()
     top5_data = sorted(solicitudes, key=lambda x: x.get('length', 0), reverse=True)[:5]
 
+    disponibilidad = get_porcentaje2(False)
+    minimo_cartones = get_minimo_cartones2()
+    minimo_selector = minimo_cartones if disponibilidad >= minimo_cartones else 1
+
     return render_template("seleccion_cartones.html",
                            enunciado=get_enunciado2(),
                            porcentaje=get_porcentaje2(True),
-                           disponibilidad=get_porcentaje2(False),
+                           disponibilidad=disponibilidad,
+                           minimo_cartones=minimo_cartones,
+                           minimo_selector=minimo_selector,
                            precio=int(get_precio2()),
                            precio_dolares=get_dolar2(),
                            modalidad=get_modalidad2(),
@@ -253,10 +281,22 @@ def pago2():
             session['session_id'] = str(uuid.uuid4())
         user_session_id = session['session_id']
 
+        disponibilidad = get_porcentaje2(False)
+        minimo_cartones = get_minimo_cartones2()
+        minimo_permitido = minimo_cartones if disponibilidad >= minimo_cartones else 1
+
         try:
-            cantidad = int(request.form.get("cantidad", 1))
+            cantidad = int(request.form.get("cantidad", minimo_permitido))
         except ValueError:
-            cantidad = 1
+            cantidad = minimo_permitido
+
+        if cantidad < minimo_permitido:
+            flash(f"Debes comprar al menos {minimo_permitido} cartones.", "warning")
+            return redirect(url_for("imprimir_cartones2"))
+
+        if cantidad > disponibilidad:
+            flash("No hay suficientes cartones disponibles en este momento.", "warning")
+            return redirect(url_for("imprimir_cartones2"))
 
         cartones_seleccionados = asignar_cartones_aleatorios2(cantidad, user_session_id)
 
@@ -407,10 +447,23 @@ def admin_dashboard_partida():
             except ValueError:
                 pass
 
+        minimo_cartones_val = request.form.get("minimoCartones")
+        minimo_cartones = None
+        if minimo_cartones_val:
+            try:
+                val = int(minimo_cartones_val)
+                limite_superior = total_cartones if total_cartones is not None else get_limite_cartones()
+                if 1 <= val <= limite_superior:
+                    minimo_cartones = val
+                else:
+                    flash(f"El mínimo de cartones debe estar entre 1 y {limite_superior}.", "danger")
+            except ValueError:
+                pass
+
         # Si el límite cambió, reiniciamos automáticamente la disponibilidad y DB
         current_limit = get_limite_cartones()
         if total_cartones is not None and total_cartones != current_limit:
-            actualizar_partida(fecha_enunciado, recompensa, precio_carton, tipo_carton, action, precio_dolares, zelle, imagen_filename, total_cartones)
+            actualizar_partida(fecha_enunciado, recompensa, precio_carton, tipo_carton, action, precio_dolares, zelle, imagen_filename, total_cartones, minimo_cartones)
 
             # Reiniciar base de datos
             conn = sqlite3.connect('bingo.db')
@@ -432,7 +485,7 @@ def admin_dashboard_partida():
                     if os.path.isfile(file_path):
                         os.remove(file_path)
         else:
-            actualizar_partida(fecha_enunciado, recompensa, precio_carton, tipo_carton, action, precio_dolares, zelle, imagen_filename)
+            actualizar_partida(fecha_enunciado, recompensa, precio_carton, tipo_carton, action, precio_dolares, zelle, imagen_filename, min_cartones=minimo_cartones)
 
         return redirect(url_for('admin_dashboard_partida'))  # redirigir a un panel de administración
     return render_template("admin_partida.html", datos=datos, venta='uno')
@@ -681,6 +734,18 @@ def admin_dashboard_partida2():
         tipo_carton = request.form.get("tipoCarton")
         precio_dolares = request.form.get("precioCarton$")
         zelle = request.form.get("zelle")
+        minimo_cartones_val = request.form.get("minimoCartones")
+        minimo_cartones = None
+
+        if minimo_cartones_val:
+            try:
+                val = int(minimo_cartones_val)
+                if 1 <= val <= 5000:
+                    minimo_cartones = val
+                else:
+                    flash("El mínimo de cartones debe estar entre 1 y 5000.", "danger")
+            except ValueError:
+                pass
 
         # Procesar subida de imagen
         imagen_file = request.files.get("imagen")
@@ -694,7 +759,7 @@ def admin_dashboard_partida2():
             imagen_file.save(filepath)
             imagen_filename = filename
 
-        actualizar_partida2(fecha_enunciado, recompensa, precio_carton, tipo_carton, action, precio_dolares, zelle, imagen_filename)
+        actualizar_partida2(fecha_enunciado, recompensa, precio_carton, tipo_carton, action, precio_dolares, zelle, imagen_filename, minimo_cartones)
         return redirect(url_for('admin_dashboard_partida2'))  # redirigir a un panel de administración
     return render_template("admin_partida.html", datos=datos, venta='dos')
 

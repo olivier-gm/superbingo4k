@@ -109,7 +109,7 @@ def obtener_datos_partida():
     cursor = conn.cursor()
 
     # Crear la consulta para obtener el dato específico (incluyendo imagen y total_cartones)
-    cursor.execute("SELECT estatus, partida, recompensa, precio_de_carton, precio_dolar, zelle, modalidad_carton_regalo, imagen, total_cartones FROM partida WHERE id = 1")
+    cursor.execute("SELECT estatus, partida, recompensa, precio_de_carton, precio_dolar, zelle, modalidad_carton_regalo, imagen, total_cartones, min_cartones FROM partida WHERE id = 1")
     resultado = cursor.fetchone()
     conn.commit()
 
@@ -132,7 +132,7 @@ def obtener_datos_partida():
 
 
 
-def actualizar_partida(fecha_enunciado=None, recompensa=None, precio_carton=None, tipo_carton=None, action=None, precio_dolares=None, zelle=None, imagen=None, total_cartones=None):
+def actualizar_partida(fecha_enunciado=None, recompensa=None, precio_carton=None, tipo_carton=None, action=None, precio_dolares=None, zelle=None, imagen=None, total_cartones=None, min_cartones=None):
     import sqlite3
 
     # Conectar a la base de datos
@@ -146,9 +146,9 @@ def actualizar_partida(fecha_enunciado=None, recompensa=None, precio_carton=None
     if count == 0:
         # Insertar una fila inicial con valores por defecto si no hay registros
         cursor.execute("""
-            INSERT INTO partida (partida, recompensa, precio_de_carton, modalidad_carton_regalo, estatus, imagen, total_cartones)
-            VALUES (?, ?, ?, ?, ?, ?, ?);
-        """, ("", "", 0.0, "", "Venta finalizada", "logo.png", 200))
+            INSERT INTO partida (partida, recompensa, precio_de_carton, modalidad_carton_regalo, estatus, imagen, total_cartones, min_cartones)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+        """, ("", "", 0.0, "", "Venta finalizada", "logo.png", 200, 1))
         conn.commit()
 
     # Construcción dinámica de los campos y valores para el comando UPDATE
@@ -190,6 +190,10 @@ def actualizar_partida(fecha_enunciado=None, recompensa=None, precio_carton=None
     if total_cartones is not None:
         fields.append("total_cartones = ?")
         values.append(total_cartones)
+
+    if min_cartones is not None:
+        fields.append("min_cartones = ?")
+        values.append(min_cartones)
 
     # Actualizar la fila solo si hay campos a modificar
     if fields:
@@ -664,3 +668,11 @@ def get_limite_cartones():
     res = cursor.fetchone()
     conn.close()
     return res[0] if res and res[0] else 200
+
+def get_minimo_cartones():
+    conn = sqlite3.connect('bingo.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT min_cartones FROM partida WHERE id = 1")
+    res = cursor.fetchone()
+    conn.close()
+    return res[0] if res and res[0] else 1
