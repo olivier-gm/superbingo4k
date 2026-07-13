@@ -1,0 +1,22 @@
+# Bases de datos / Database files
+
+
+# Carpetas de imágenes y comprobantes / Image and receipt folders
+**/comprobantes/
+**/comprobantes2/
+**/img/
+
+# Python / Virtual Environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+ENV/
+env/
+
+# Entornos virtuales e IDEs / IDEs and environments
+.vscode/
+.idea/
+.DS_Store
