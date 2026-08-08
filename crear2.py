@@ -1,7 +1,8 @@
 import sqlite3
+from config import BINGO2_DB_PATH
 
 # Crear conexión a la base de datos SQLite3
-conn = sqlite3.connect("bingo2.db")
+conn = sqlite3.connect(BINGO2_DB_PATH)
 cursor = conn.cursor()
 
 # Tabla "partida" (solo permite una fila)
