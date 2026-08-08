@@ -192,6 +192,7 @@ chunk1 = """
 """
 
 import sqlite3
+from config import BINGO_DB_PATH
 import json
 
 lines = chunk1.strip().split('\n')
@@ -243,7 +244,7 @@ print(f"Total de compradores parseados: {len(parsed_records)}")
 print(f"Total de cartones vendidos sumados: {total_ordered_cartones}")
 
 # Conectar e insertar en la base de datos
-conn = sqlite3.connect("bingo.db")
+conn = sqlite3.connect(BINGO_DB_PATH)
 cursor = conn.cursor()
 
 # 0. Limpiar tabla requeridos

@@ -1,8 +1,9 @@
 import sqlite3
 import json
 import time
+from config import BINGO2_DB_PATH
 
-DB_NAME = "bingo2.db"
+DB_NAME = BINGO2_DB_PATH
 
 def execute_query(query, params=(), fetch=False, fetchone=False):
     conn = sqlite3.connect(DB_NAME)
@@ -18,7 +19,7 @@ def execute_query(query, params=(), fetch=False, fetchone=False):
 
 def obtener_datos_partida2():
     # Conectar a la base de datos
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
 
     # Crear la consulta para obtener el dato específico (incluyendo imagen)
@@ -49,7 +50,7 @@ def actualizar_partida2(fecha_enunciado=None, recompensa=None, precio_carton=Non
     import sqlite3
 
     # Conectar a la base de datos
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
 
     # Verificar si la tabla tiene al menos una fila
@@ -222,7 +223,7 @@ def cartones_usados2(C=None, read=None, U=None, D=None):
 
 
 def get_data2():
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
 
     # Consulta todos los datos de la tabla
@@ -260,7 +261,7 @@ def get_data2():
 def get_datatop2():
     import sqlite3
 
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
 
     # Consulta para agrupar por cedula y sumar el campo length
@@ -309,7 +310,7 @@ def get_datatop2():
 
 
 def get_enunciado2():
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
 
     cursor.execute("SELECT estatus FROM partida WHERE id = 1")
@@ -329,7 +330,7 @@ def get_enunciado2():
     return data[0] if data else None
 
 def get_premio2():
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT recompensa FROM partida")
     data = cursor.fetchone()  # Recupera todos los datos de la tabla
@@ -337,7 +338,7 @@ def get_premio2():
     return data[0] if data else None
 
 def get_precio2():
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT precio_de_carton FROM partida")
     data = cursor.fetchone()  # Recupera todos los datos de la tabla
@@ -356,7 +357,7 @@ def insertar_comprador2(nombre_apellido, cedula, telefono, referencia, cartones_
     while attempt < max_retries:
         try:
             # Conectar a la base de datos
-            conn = sqlite3.connect('bingo2.db')
+            conn = sqlite3.connect(BINGO2_DB_PATH)
             cursor = conn.cursor()
 
             # Iniciar la transacción explícitamente
@@ -383,7 +384,7 @@ def insertar_comprador2(nombre_apellido, cedula, telefono, referencia, cartones_
                 else:
                     # Si se superan los intentos, retornar un mensaje
                     print("insercion invalida")
-                    conn = sqlite3.connect('bingo2.db')
+                    conn = sqlite3.connect(BINGO2_DB_PATH)
                     cursor = conn.cursor()
 
 
@@ -432,7 +433,7 @@ def insertar_comprador2(nombre_apellido, cedula, telefono, referencia, cartones_
 
 
 def get_estatus2():
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT estatus FROM partida WHERE id = 1")
     estatus = cursor.fetchone()[0]
@@ -440,7 +441,7 @@ def get_estatus2():
     return estatus if estatus else None
 
 def get_modalidad2():
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT modalidad_carton_regalo FROM partida WHERE id = 1")
     modalidad = cursor.fetchone()[0]
@@ -449,7 +450,7 @@ def get_modalidad2():
 
 def vendidos2(cartones):
     # Conectar a la base de datos
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
 
     # Convertir los valores del array en tuplas (executemany espera una lista de tuplas)
@@ -471,7 +472,7 @@ def vendidos2(cartones):
         conn.close()
 
 def get_dolar2():
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT precio_dolar FROM partida WHERE id = 1")
     dolar = cursor.fetchone()[0]
@@ -479,7 +480,7 @@ def get_dolar2():
     return dolar if dolar else None
 
 def get_zelle2():
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT zelle FROM partida WHERE id = 1")
     zelle = cursor.fetchone()[0]
@@ -490,7 +491,7 @@ def get_zelle2():
 
 def reintegrar_cartones2(cartones):
     # Conectar a la base de datos
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
 
     # Convertir los valores del array en tuplas (executemany espera una lista de tuplas)
@@ -513,7 +514,7 @@ def reintegrar_cartones2(cartones):
         conn.close()
 
 def get_porcentaje2(flag):
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(carton_disponible) FROM cartones_disponibles")
     cantidad = cursor.fetchone()[0]
@@ -527,7 +528,7 @@ def get_porcentaje2(flag):
     return round(porcentaje, 2)
 
 def get_imagen2():
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT imagen FROM partida WHERE id = 1")
     res = cursor.fetchone()
@@ -535,7 +536,7 @@ def get_imagen2():
     return res[0] if res and res[0] else "logo.png"
 
 def get_minimo_cartones2():
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT min_cartones FROM partida WHERE id = 1")
     res = cursor.fetchone()
@@ -543,7 +544,7 @@ def get_minimo_cartones2():
     return res[0] if res and res[0] else 1
 
 def asignar_cartones_aleatorios2(cantidad, session_id):
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
     
     # 1. Limpiar cartones expirados

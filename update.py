@@ -1,4 +1,5 @@
 import sqlite3
+from config import BINGO_DB_PATH, BINGO2_DB_PATH
 
 def actualizar_tabla(database_name):
     """
@@ -28,7 +29,7 @@ def actualizar_tabla(database_name):
             conn.close()
 
 # Bases de datos a procesar
-databases = ['bingo.db', 'bingo2.db']
+databases = [BINGO_DB_PATH, BINGO2_DB_PATH]
 
 # Iterar sobre la lista y ejecutar la función para cada base de datos
 for db in databases:
