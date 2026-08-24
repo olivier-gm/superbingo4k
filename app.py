@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash, send_from_directory
 from crud import get_datatop, obtener_comprador_por_cedula, get_porcentaje, cartones_disponibles,cartones_usados,reintegrar_cartones,get_data,actualizar_partida,obtener_datos_partida, get_enunciado, get_premio, insertar_comprador, get_estatus, get_precio, vendidos, get_modalidad, get_dolar, get_zelle, get_imagen, asignar_cartones_aleatorios, get_limite_cartones, get_minimo_cartones
 from crud2 import get_datatop2, get_porcentaje2, cartones_disponibles2,cartones_usados2,reintegrar_cartones2,get_data2,actualizar_partida2,obtener_datos_partida2, get_enunciado2, get_premio2, insertar_comprador2, get_estatus2, get_precio2, vendidos2, get_modalidad2, get_dolar2, get_zelle2, get_imagen2, asignar_cartones_aleatorios2, get_minimo_cartones2
 import os
@@ -11,6 +11,7 @@ import string
 import re
 import time
 import uuid # Para generar identificadores únicos de sesión
+from config import BINGO_DB_PATH, BINGO2_DB_PATH, UPLOAD_DIR
 
 
 # Decorador para proteger las rutas
@@ -23,13 +24,12 @@ def login_required(f):
     return decorated_function
 
 app = Flask(__name__)
-UPLOAD_FOLDER = 'static/comprobantes'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = UPLOAD_DIR
 app.config['SECRET_KEY'] = 'supersecretkey'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 def init_db():
-    with sqlite3.connect("bingo.db") as conn:
+    with sqlite3.connect(BINGO_DB_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS cartones_temporales (
@@ -41,7 +41,7 @@ def init_db():
         conn.commit()
 
 def init_db2():
-    with sqlite3.connect("bingo2.db") as conn:
+    with sqlite3.connect(BINGO2_DB_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS cartones_temporales (
@@ -54,7 +54,7 @@ def init_db2():
 
 def check_and_upgrade_db():
     # 1. ensure columns in cartones_temporales and partida tables
-    for db_name in ["bingo.db", "bingo2.db"]:
+    for db_name in [BINGO_DB_PATH, BINGO2_DB_PATH]:
         try:
             with sqlite3.connect(db_name) as conn:
                 cursor = conn.cursor()
@@ -87,6 +87,11 @@ check_and_upgrade_db()
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.route('/comprobantes/<path:filename>')
+def serve_comprobante(filename):
+    return send_from_directory(UPLOAD_DIR, filename)
 
 
 @app.route('/', methods=["GET"])
@@ -247,7 +252,7 @@ def registrar():
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             nmr_r.save(filepath)
 
-            referencia_ruta = os.path.join('/static/comprobantes', filename).replace("\\", "/")
+            referencia_ruta = url_for('serve_comprobante', filename=filename)
             fecha = get_enunciado()
 
         # Recuperar los datos de la compra (los valores pasados en los campos ocultos)
@@ -382,7 +387,7 @@ def registrar2():
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             nmr_r.save(filepath)
 
-            referencia_ruta = os.path.join('/static/comprobantes', filename).replace("\\", "/")
+            referencia_ruta = url_for('serve_comprobante', filename=filename)
             fecha = get_enunciado2()
 
         # Recuperar los datos de la compra (los valores pasados en los campos ocultos)
@@ -496,7 +501,7 @@ def admin_dashboard_partida():
             actualizar_partida(fecha_enunciado, recompensa, precio_carton, tipo_carton, action, precio_dolares, zelle, imagen_filename, total_cartones, minimo_cartones)
 
             # Reiniciar base de datos
-            conn = sqlite3.connect('bingo.db')
+            conn = sqlite3.connect(BINGO_DB_PATH)
             cursor = conn.cursor()
             cursor.execute("DELETE FROM cartones_disponibles")
             cursor.execute("DELETE FROM requeridos")
@@ -508,7 +513,7 @@ def admin_dashboard_partida():
             conn.close()
 
             # Eliminar comprobantes
-            folder_path = 'static/comprobantes/'
+            folder_path = UPLOAD_DIR
             if os.path.exists(folder_path):
                 for filename in os.listdir(folder_path):
                     file_path = os.path.join(folder_path, filename)
@@ -527,7 +532,7 @@ def admin_dashboard_partida():
 def reiniciar():
 
     limite = get_limite_cartones()
-    conn = sqlite3.connect('bingo.db')
+    conn = sqlite3.connect(BINGO_DB_PATH)
     cursor = conn.cursor()
 
     cursor.execute("""DELETE FROM cartones_disponibles WHERE 1 = 1""")
@@ -547,7 +552,7 @@ def reiniciar():
     conn.close()
 
     # Eliminar todos los archivos en /static/comprobantes/
-    folder_path = 'static/comprobantes/'
+    folder_path = UPLOAD_DIR
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
         if os.path.isfile(file_path):  # Verificar si es un archivo
@@ -599,7 +604,7 @@ def approve():
     data = request.get_json()
     solicitud_id = data.get("id")
 
-    conn = sqlite3.connect('bingo.db')
+    conn = sqlite3.connect(BINGO_DB_PATH)
     cursor = conn.cursor()
 
     try:
@@ -623,7 +628,7 @@ def invalidate():
     solicitud_id = data.get("id")
 
     # Conectar a la base de datos
-    conn = sqlite3.connect('bingo.db')
+    conn = sqlite3.connect(BINGO_DB_PATH)
     cursor = conn.cursor()
 
     try:
@@ -671,7 +676,7 @@ def message():
     solicitud_id = data.get("id")
 
     # Conectar a la base de datos
-    conn = sqlite3.connect('bingo.db')
+    conn = sqlite3.connect(BINGO_DB_PATH)
     cursor = conn.cursor()
 
     # Verificar si la solicitud existe
@@ -702,7 +707,7 @@ def message():
 @app.route("/admin/dashboard/vendidos")
 @login_required  # Ruta protegida por login
 def mostrar_cartones():
-    with sqlite3.connect("bingo.db") as conn:
+    with sqlite3.connect(BINGO_DB_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT cartones_solicitados FROM requeridos;")
         cartones_tuplas = cursor.fetchall()
@@ -798,7 +803,7 @@ def admin_dashboard_partida2():
 @login_required  # Ruta protegida por login
 def reiniciar2():
 
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
 
     cursor.execute("""DELETE FROM cartones_disponibles WHERE 1 = 1""")
@@ -815,7 +820,7 @@ def reiniciar2():
     conn.close()
 
         # Eliminar todos los archivos en /static/comprobantes/
-    folder_path = 'static/comprobantes/'
+    folder_path = UPLOAD_DIR
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
         if os.path.isfile(file_path):  # Verificar si es un archivo
@@ -842,7 +847,7 @@ def approve2():
     solicitud_id = data.get("id")
 
     # Conectar a la base de datos
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
 
     try:
@@ -866,7 +871,7 @@ def invalidate2():
     solicitud_id = data.get("id")
 
     # Conectar a la base de datos
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
 
     try:
@@ -910,7 +915,7 @@ def message2():
     solicitud_id = data.get("id")
 
     # Conectar a la base de datos
-    conn = sqlite3.connect('bingo2.db')
+    conn = sqlite3.connect(BINGO2_DB_PATH)
     cursor = conn.cursor()
 
     # Verificar si la solicitud existe
@@ -941,7 +946,7 @@ def message2():
 @app.route("/admin/dashboard/vendidos2")
 @login_required  # Ruta protegida por login
 def mostrar_cartones2():
-    with sqlite3.connect("bingo2.db") as conn:
+    with sqlite3.connect(BINGO2_DB_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT cartones_solicitados FROM requeridos;")
         cartones_tuplas = cursor.fetchall()

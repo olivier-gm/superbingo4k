@@ -307,6 +307,7 @@
                     <button class="btn btn-outline-light" type="button" onclick="adjustQuantity(-1)">-</button>
                     <input type="number" class="form-control custom-select" id="cantidad" name="cantidad"
                         min="{{ minimo_selector }}" max="{{ disponibilidad }}" value="{{ minimo_selector }}" required
+                        step="{{ minimo_selector }}"
                         style="text-align: center; font-weight: bold;">
                     <button class="btn btn-outline-light" type="button" onclick="adjustQuantity(1)">+</button>
                 </div>
@@ -388,8 +389,9 @@
             const input = document.getElementById("cantidad");
             const min = parseInt(input.min || "1", 10);
             const max = parseInt(input.max || "1", 10);
+            const step = parseInt(input.step || min || "1", 10);
             const current = parseInt(input.value || min, 10);
-            const next = Math.min(max, Math.max(min, current + delta));
+            const next = Math.min(max, Math.max(min, current + (delta * step)));
             input.value = next;
         }
 
