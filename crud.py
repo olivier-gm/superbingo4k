@@ -662,6 +662,48 @@ def asignar_cartones_aleatorios(cantidad, session_id):
     conn.close()
     return cartones
 
+def reservar_cartones_manual(cartones_seleccionados, session_id):
+    """Reserva los cartones elegidos manualmente por el usuario.
+    Devuelve (True, []) si se reservaron todos, o (False, conflictivos) si alguno
+    ya fue vendido o está reservado por otra sesión."""
+    conn = sqlite3.connect(BINGO_DB_PATH)
+    cursor = conn.cursor()
+
+    # 1. Limpiar cartones expirados
+    cursor.execute("DELETE FROM cartones_temporales WHERE timestamp <= datetime('now', '-25 minutes')")
+    conn.commit()
+
+    placeholders = ', '.join('?' for _ in cartones_seleccionados)
+
+    # 2. Verificar que todos sigan disponibles (no vendidos)
+    cursor.execute(f"""
+        SELECT carton_disponible FROM cartones_disponibles
+        WHERE carton_disponible IN ({placeholders})
+    """, cartones_seleccionados)
+    disponibles = {str(row[0]) for row in cursor.fetchall()}
+    no_disponibles = [c for c in cartones_seleccionados if c not in disponibles]
+    if no_disponibles:
+        conn.close()
+        return False, no_disponibles
+
+    # 3. Verificar que ninguno esté reservado temporalmente por otra sesión
+    cursor.execute(f"""
+        SELECT carton FROM cartones_temporales
+        WHERE carton IN ({placeholders}) AND session_id != ?
+    """, cartones_seleccionados + [session_id])
+    reservados_por_otros = [str(row[0]) for row in cursor.fetchall()]
+    if reservados_por_otros:
+        conn.close()
+        return False, reservados_por_otros
+
+    # 4. Reservar para esta sesión
+    cursor.execute("DELETE FROM cartones_temporales WHERE session_id = ?", (session_id,))
+    cartones_para_insertar = [(c, session_id) for c in cartones_seleccionados]
+    cursor.executemany("INSERT INTO cartones_temporales (carton, session_id) VALUES (?, ?)", cartones_para_insertar)
+    conn.commit()
+    conn.close()
+    return True, []
+
 def get_limite_cartones():
     conn = sqlite3.connect(BINGO_DB_PATH)
     cursor = conn.cursor()

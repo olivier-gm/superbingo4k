@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash, send_from_directory
-from crud import get_datatop, obtener_comprador_por_cedula, get_porcentaje, cartones_disponibles,cartones_usados,reintegrar_cartones,get_data,actualizar_partida,obtener_datos_partida, get_enunciado, get_premio, insertar_comprador, get_estatus, get_precio, vendidos, get_modalidad, get_dolar, get_zelle, get_imagen, asignar_cartones_aleatorios, get_limite_cartones, get_minimo_cartones
-from crud2 import get_datatop2, get_porcentaje2, cartones_disponibles2,cartones_usados2,reintegrar_cartones2,get_data2,actualizar_partida2,obtener_datos_partida2, get_enunciado2, get_premio2, insertar_comprador2, get_estatus2, get_precio2, vendidos2, get_modalidad2, get_dolar2, get_zelle2, get_imagen2, asignar_cartones_aleatorios2, get_minimo_cartones2
+from crud import get_datatop, obtener_comprador_por_cedula, get_porcentaje, cartones_disponibles,cartones_usados,reintegrar_cartones,get_data,actualizar_partida,obtener_datos_partida, get_enunciado, get_premio, insertar_comprador, get_estatus, get_precio, vendidos, get_modalidad, get_dolar, get_zelle, get_imagen, get_limite_cartones, get_minimo_cartones, reservar_cartones_manual
+from crud2 import get_datatop2, get_porcentaje2, cartones_disponibles2,cartones_usados2,reintegrar_cartones2,get_data2,actualizar_partida2,obtener_datos_partida2, get_enunciado2, get_premio2, insertar_comprador2, get_estatus2, get_precio2, vendidos2, get_modalidad2, get_dolar2, get_zelle2, get_imagen2, get_minimo_cartones2, reservar_cartones_manual2
 import os
 from werkzeug.utils import secure_filename
 from functools import wraps
@@ -157,6 +157,8 @@ def imprimir_cartones():
     minimo_cartones = get_minimo_cartones()
     minimo_selector = minimo_cartones if disponibilidad >= minimo_cartones else 1
 
+    cartones = sorted((int(c[0]) for c in cartones_disponibles(read="*")))
+
     return render_template("seleccion_cartones.html",
                            enunciado=get_enunciado(),
                            porcentaje=get_porcentaje(True),
@@ -168,6 +170,7 @@ def imprimir_cartones():
                            modalidad=get_modalidad(),
                            venta='uno',
                            imagen=get_imagen(),
+                           cartones=cartones,
                            top5_compradores=top5_data)
 
 
@@ -183,23 +186,33 @@ def pago():
         minimo_cartones = get_minimo_cartones()
         minimo_permitido = minimo_cartones if disponibilidad >= minimo_cartones else 1
 
-        try:
-            cantidad = int(request.form.get("cantidad", minimo_permitido))
-        except ValueError:
-            cantidad = minimo_permitido
+        cartones_seleccionados = request.form.getlist("cartones")
+        if len(cartones_seleccionados) == 1 and ',' in cartones_seleccionados[0]:
+            cartones_seleccionados = cartones_seleccionados[0].split(',')
+        cartones_seleccionados = [c.strip() for c in cartones_seleccionados if c.strip()]
+
+        if not cartones_seleccionados:
+            flash("Debes seleccionar al menos un cartón.", "warning")
+            return redirect(url_for("imprimir_cartones"))
+
+        cantidad = len(cartones_seleccionados)
 
         if cantidad < minimo_permitido:
             flash(f"Debes comprar al menos {minimo_permitido} cartones.", "warning")
+            return redirect(url_for("imprimir_cartones"))
+
+        if cantidad % minimo_permitido != 0:
+            flash(f"Debes seleccionar los cartones en múltiplos de {minimo_permitido}.", "warning")
             return redirect(url_for("imprimir_cartones"))
 
         if cantidad > disponibilidad:
             flash("No hay suficientes cartones disponibles en este momento.", "warning")
             return redirect(url_for("imprimir_cartones"))
 
-        cartones_seleccionados = asignar_cartones_aleatorios(cantidad, user_session_id)
+        reservado, conflictivos = reservar_cartones_manual(cartones_seleccionados, user_session_id)
 
-        if not cartones_seleccionados:
-            flash("No hay suficientes cartones disponibles en este momento.", "warning")
+        if not reservado:
+            flash(f"Los cartones {', '.join(conflictivos)} ya no están disponibles o fueron seleccionados por otro usuario.", "warning")
             return redirect(url_for("imprimir_cartones"))
 
         # Calcular precios en el backend
@@ -294,6 +307,8 @@ def imprimir_cartones2():
     minimo_cartones = get_minimo_cartones2()
     minimo_selector = minimo_cartones if disponibilidad >= minimo_cartones else 1
 
+    cartones = sorted((int(c[0]) for c in cartones_disponibles2(read="*")))
+
     return render_template("seleccion_cartones.html",
                            enunciado=get_enunciado2(),
                            porcentaje=get_porcentaje2(True),
@@ -305,6 +320,7 @@ def imprimir_cartones2():
                            modalidad=get_modalidad2(),
                            venta='dos',
                            imagen=get_imagen2(),
+                           cartones=cartones,
                            top5_compradores=top5_data)
 
 
@@ -320,27 +336,34 @@ def pago2():
         minimo_cartones = get_minimo_cartones2()
         minimo_permitido = minimo_cartones if disponibilidad >= minimo_cartones else 1
 
-        try:
-            cantidad = int(request.form.get("cantidad", minimo_permitido))
-        except ValueError:
-            cantidad = minimo_permitido
+        cartones_seleccionados = request.form.getlist("cartones")
+        if len(cartones_seleccionados) == 1 and ',' in cartones_seleccionados[0]:
+            cartones_seleccionados = cartones_seleccionados[0].split(',')
+        cartones_seleccionados = [c.strip() for c in cartones_seleccionados if c.strip()]
+
+        if not cartones_seleccionados:
+            flash("Debes seleccionar al menos un cartón.", "warning")
+            return redirect(url_for("imprimir_cartones2"))
+
+        cantidad = len(cartones_seleccionados)
 
         if cantidad < minimo_permitido:
             flash(f"Debes comprar al menos {minimo_permitido} cartones.", "warning")
+            return redirect(url_for("imprimir_cartones2"))
+
+        if cantidad % minimo_permitido != 0:
+            flash(f"Debes seleccionar los cartones en múltiplos de {minimo_permitido}.", "warning")
             return redirect(url_for("imprimir_cartones2"))
 
         if cantidad > disponibilidad:
             flash("No hay suficientes cartones disponibles en este momento.", "warning")
             return redirect(url_for("imprimir_cartones2"))
 
-        cartones_seleccionados = asignar_cartones_aleatorios2(cantidad, user_session_id)
+        reservado, conflictivos = reservar_cartones_manual2(cartones_seleccionados, user_session_id)
 
-        if not cartones_seleccionados:
-            flash("No hay suficientes cartones disponibles en este momento.", "warning")
+        if not reservado:
+            flash(f"Los cartones {', '.join(conflictivos)} ya no están disponibles o fueron seleccionados por otro usuario.", "warning")
             return redirect(url_for("imprimir_cartones2"))
-
-        if len(cartones_seleccionados) < cantidad:
-            flash(f"Solo se pudieron asignar {len(cartones_seleccionados)} cartones.", "warning")
 
         # Calcular precios en el backend
         precio_bs = float(get_precio2())
