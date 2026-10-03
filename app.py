@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash, send_from_directory
-from crud import get_datatop, obtener_comprador_por_cedula, get_porcentaje, cartones_disponibles,cartones_usados,reintegrar_cartones,get_data,actualizar_partida,obtener_datos_partida, get_enunciado, get_premio, insertar_comprador, get_estatus, get_precio, vendidos, get_modalidad, get_dolar, get_zelle, get_imagen, get_limite_cartones, get_minimo_cartones, reservar_cartones_manual
-from crud2 import get_datatop2, get_porcentaje2, cartones_disponibles2,cartones_usados2,reintegrar_cartones2,get_data2,actualizar_partida2,obtener_datos_partida2, get_enunciado2, get_premio2, insertar_comprador2, get_estatus2, get_precio2, vendidos2, get_modalidad2, get_dolar2, get_zelle2, get_imagen2, get_minimo_cartones2, reservar_cartones_manual2
+from crud import get_datatop, obtener_comprador_por_cedula, get_porcentaje, get_resumen_disponibilidad, cartones_disponibles,cartones_usados,reintegrar_cartones,get_data,actualizar_partida,obtener_datos_partida, get_enunciado, get_premio, insertar_comprador, get_estatus, get_precio, vendidos, get_modalidad, get_dolar, get_zelle, get_imagen, get_limite_cartones, get_minimo_cartones, reservar_cartones_manual
+from crud2 import get_datatop2, get_porcentaje2, get_resumen_disponibilidad2, cartones_disponibles2,cartones_usados2,reintegrar_cartones2,get_data2,actualizar_partida2,obtener_datos_partida2, get_enunciado2, get_premio2, insertar_comprador2, get_estatus2, get_precio2, vendidos2, get_modalidad2, get_dolar2, get_zelle2, get_imagen2, get_minimo_cartones2, reservar_cartones_manual2
 import os
 from werkzeug.utils import secure_filename
 from functools import wraps
@@ -153,7 +153,7 @@ def imprimir_cartones():
     solicitudes = get_datatop()
     top5_data = sorted(solicitudes, key=lambda x: x.get('length', 0), reverse=True)[:5]
 
-    disponibilidad = get_porcentaje(False)
+    porcentaje, disponibilidad = get_resumen_disponibilidad()
     minimo_cartones = get_minimo_cartones()
     minimo_selector = minimo_cartones if disponibilidad >= minimo_cartones else 1
 
@@ -161,7 +161,7 @@ def imprimir_cartones():
 
     return render_template("seleccion_cartones.html",
                            enunciado=get_enunciado(),
-                           porcentaje=get_porcentaje(True),
+                           porcentaje=porcentaje,
                            disponibilidad=disponibilidad,
                            minimo_cartones=minimo_cartones,
                            minimo_selector=minimo_selector,
@@ -303,7 +303,7 @@ def imprimir_cartones2():
     solicitudes = get_datatop2()
     top5_data = sorted(solicitudes, key=lambda x: x.get('length', 0), reverse=True)[:5]
 
-    disponibilidad = get_porcentaje2(False)
+    porcentaje, disponibilidad = get_resumen_disponibilidad2()
     minimo_cartones = get_minimo_cartones2()
     minimo_selector = minimo_cartones if disponibilidad >= minimo_cartones else 1
 
@@ -311,7 +311,7 @@ def imprimir_cartones2():
 
     return render_template("seleccion_cartones.html",
                            enunciado=get_enunciado2(),
-                           porcentaje=get_porcentaje2(True),
+                           porcentaje=porcentaje,
                            disponibilidad=disponibilidad,
                            minimo_cartones=minimo_cartones,
                            minimo_selector=minimo_selector,

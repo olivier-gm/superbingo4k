@@ -624,6 +624,17 @@ def get_porcentaje(flag):
     porcentaje = (cantidad / total) * 100
     return round(porcentaje, 2)
 
+def get_resumen_disponibilidad():
+    with sqlite3.connect(BINGO_DB_PATH) as conn:
+        cantidad = conn.execute(
+            "SELECT COUNT(carton_disponible) FROM cartones_disponibles"
+        ).fetchone()[0]
+        res_total = conn.execute(
+            "SELECT total_cartones FROM partida WHERE id = 1"
+        ).fetchone()
+    total = res_total[0] if res_total and res_total[0] else 200
+    return round((cantidad / total) * 100, 2), cantidad
+
 def get_imagen():
     conn = sqlite3.connect(BINGO_DB_PATH)
     cursor = conn.cursor()
